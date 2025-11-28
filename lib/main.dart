@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         backgroundColor: Colors.black,
         body: Center(
-          child: Column(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               CircleAvatar(
@@ -26,6 +26,15 @@ class MyApp extends StatelessWidget {
                       height: 100,
                       fit: BoxFit.cover,
                   ),
+                ),
+              ),
+              SizedBox(width: 15),
+              Text(
+                "SERUM",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
