@@ -132,7 +132,8 @@ class MyApp extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                    },
                     child: Text(
                       "Forgot password?",
                       style: TextStyle(
@@ -246,7 +247,36 @@ class MyApp extends StatelessWidget {
                       ),
                     ),
                   ],
-                )
+                ),
+                const SizedBox(height: 60),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                        "Don't have an account? ",
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    TextButton(
+                      onPressed: () {
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size(0, 0),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        "Create one",
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
