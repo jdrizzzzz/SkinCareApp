@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const LoginPage());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
@@ -18,10 +25,11 @@ class MyApp extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+
+                    // the title and the icon
                     CircleAvatar(
                       radius: 20.0,
                       backgroundColor: Colors.transparent,
@@ -71,6 +79,7 @@ class MyApp extends StatelessWidget {
                 ),
                 const SizedBox(height: 40),
 
+                //Email text and textbox
                 const Text(
                   "Email",
                   style: TextStyle(
@@ -79,7 +88,6 @@ class MyApp extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-
                 TextField(
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
@@ -99,6 +107,7 @@ class MyApp extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
+                //Password text and textbox
                 const Text(
                   "Password",
                   style: TextStyle(
@@ -107,16 +116,27 @@ class MyApp extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-
                 TextField(
-                  obscureText: true,
+                  obscureText: _obscurePassword,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Enter your password",
                     hintStyle: const TextStyle(color: Colors.white38),
                     filled: true,
                     fillColor: const Color(0xFF1A1A1A),
-                    suffixIcon: const Icon(Icons.visibility_off, color: Colors.white54), //the eye for password
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: Colors.white54,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -129,11 +149,18 @@ class MyApp extends StatelessWidget {
                 ),
                 const SizedBox(height: 25),
 
+                //Forgot password text/button
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
+
                     },
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 0),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                     child: Text(
                       "Forgot password?",
                       style: TextStyle(
@@ -141,19 +168,16 @@ class MyApp extends StatelessWidget {
                         decoration: TextDecoration.underline,
                       ),
                     ),
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size(0, 0),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
                   ),
                 ),
                 const SizedBox(height: 25),
 
+                //Sign in text/button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
+
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFFC933),
@@ -171,8 +195,9 @@ class MyApp extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 60),
 
+                //The --or--  has to be in a row
                 Row(
                   children: [
                     Expanded(
@@ -199,8 +224,9 @@ class MyApp extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 60),
 
+                //Google and apple icon has to be in a row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -250,21 +276,23 @@ class MyApp extends StatelessWidget {
                 ),
                 const SizedBox(height: 60),
 
+                //"Dont have an account" text in a row with "Create one" text/button
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text(
-                        "Don't have an account? ",
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
+                      "Don't have an account? ",
+                      style: TextStyle(
+                        color: Colors.white,
                       ),
+                    ),
                     TextButton(
                       onPressed: () {
+
                       },
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
-                        minimumSize: Size(0, 0),
+                        minimumSize: const Size(0, 0),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       child: Text(
