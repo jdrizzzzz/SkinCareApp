@@ -36,6 +36,10 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_launcher_icons: ^0.14.4
   flutter_native_splash: ^2.4.0
+  http: ^1.6.0
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
+  lottie: ^3.3.2
 
 dev_dependencies:
   flutter_test:
