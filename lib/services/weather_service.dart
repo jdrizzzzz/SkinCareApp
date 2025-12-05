@@ -8,19 +8,21 @@ import '../models/weather_model.dart';
 //-------------------This is the help / API tool -------------------
 // it only knows http request, the gps and json parsing
 
-class WeatherService{             //This fetches the weather data
-  static const BASE_URL = 'http://api.openweathermap.org/data/2.5/weather';
+class WeatherService {                //fetches the weather data
+  static const BASE_URL = 'http://api.weatherapi.com/v1/current.json';
   final String apiKey;
 
   WeatherService(this.apiKey);
 
-  Future<Weather> getWeather(String cityName) async {
-    //the function to get the weather
-    final response = await http.get(
-        Uri.parse('$BASE_URL?q=$cityName&appid=$apiKey&units=metric'));
+  Future<Weather> getWeather(String locationQuery) async {
+    final uri = Uri.parse(
+      '$BASE_URL?key=$apiKey&q=$locationQuery&aqi=yes',
+    );
+
+    final response = await http.get(uri);
 
     if (response.statusCode == 200) {
-      return Weather.fromJson(jsonDecode(response.body)); //calls the function from weather model
+      return Weather.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to load weather data');
     }
@@ -39,10 +41,13 @@ class WeatherService{             //This fetches the weather data
     );
 
     //Convert the raw coordinates into a readable location
-    List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+      position.latitude,
+      position.longitude,
+    );
 
-    String? city = placemarks[0].locality;
+    String? city = placemarks.isNotEmpty ? placemarks[0].locality : null;
 
-    return city ?? "";
+    return city ?? 'Unknown';
   }
 }
