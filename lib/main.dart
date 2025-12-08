@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:skincare_project/pages/create_account_page.dart';
 import 'package:skincare_project/pages/weather_page.dart';
 import 'pages/login_page.dart';
 
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const WeatherPage(),
+      home: const CreateAccountPage(),
         routes:{
         '/loginpage' :(context) => LoginPage(),
         '/weatherpage' :(context) => WeatherPage(),
