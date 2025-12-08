@@ -51,7 +51,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 40),
 
               const Center(
                 child: Text(
@@ -63,7 +63,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 40),
 
               // Email text and textbox
               const Text(
