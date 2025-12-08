@@ -68,16 +68,16 @@ class _WeatherPageState extends State<WeatherPage> {
 
     final text = condition.toLowerCase();
 
-    if (text.contains('cloud')) return 'images/cloudy.json';
-    if (text.contains('mist')) return 'images/cloudy.json';
-    if (text.contains('fog')) return 'images/cloudy.json';
+    if (text.contains('cloud') || text.contains('mist') || text.contains('fog')|| text.contains('overcast')) {
+      return 'images/cloudy.json';
+    }
     if (text.contains('rain') || text.contains('drizzle')) {
       return 'images/rain.json';
     }
     if (text.contains('thunder')) {
       return 'images/thunder.json';
     }
-    if (text.contains('snow')) {
+    if (text.contains('snow') || text.contains('shower sleet') || text.contains('rain and snow')) {
       return 'images/snow.json';
     }
     if (text.contains('clear') || text.contains('sun')) {
@@ -119,10 +119,6 @@ class _WeatherPageState extends State<WeatherPage> {
             label: 'Routine',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.camera),
-            label: 'Scan',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.shopping_basket),
             label: 'Products',
           ),
@@ -152,22 +148,26 @@ class _WeatherPageState extends State<WeatherPage> {
                   Text('${_weather?.mainCondition}'),
                   //animation for the weather
                   SizedBox(
-                    height:250,
-                      width:250,
-                      child: Lottie.asset(getWeatherAnimation(_weather?.mainCondition))
+                    height:200,
+                      width:200,
+                      child: Lottie.asset(getWeatherAnimation(_weather?.mainCondition))       //weather icon
                   ),
                   SizedBox(
-                      height:120,
+                      height:90,
                       width: double.infinity,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.grey[200],
+                          color: Colors.orange[50],
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: Center(
-                            child: Text('TESTING TESTING'), // -------USE AI RECOMMENDATION HERE
+                            child: Text("Today's Tip",
+                              style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,), // -------USE AI RECOMMENDATION HERE
+                            ),
+                        ),
                       ),
-                    ),
                   ),
                 ],
               ),
@@ -302,7 +302,6 @@ class _WeatherPageState extends State<WeatherPage> {
                           color: Colors.amber,
                           size: 24,
                         ),
-                        SizedBox(width: 8),
                         Column(
                           children: [
                             Text(
@@ -324,8 +323,29 @@ class _WeatherPageState extends State<WeatherPage> {
                 ),
               ],
             ),
+            const SizedBox(height: 10),
 
-
+            SizedBox(
+              height: 70,
+              width: double.infinity,
+              child: TextButton(
+                onPressed: () {
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.orange[50],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                child: const Text(
+                  "View your progress",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
 
           ],
         ),

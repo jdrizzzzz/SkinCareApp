@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: const WeatherPage(),
         routes:{
+        '/loginpage' :(context) => LoginPage(),
         '/weatherpage' :(context) => WeatherPage(),
         }
     );
