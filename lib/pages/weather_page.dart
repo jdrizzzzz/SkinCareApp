@@ -16,7 +16,18 @@ class WeatherPage extends StatefulWidget {
 
 class _WeatherPageState extends State<WeatherPage> {
   //Functions------------------------------------
-  int _selectedIndex = 0; //------- for the bottomnavigationbar
+
+  // For the bottomnavigationbar
+  int _selectedIndex = 0;
+
+  //final List<Widget> _screens = const [
+  //  HomeScreen(),
+  //  RoutineScreen(),
+  //  ProductsScreen(),
+  //  ProfileScreen(),
+  //];
+
+
 
   //apiKey
   final weatherService = WeatherService('70bfb62eb9754779b4305934250512');
@@ -111,8 +122,8 @@ class _WeatherPageState extends State<WeatherPage> {
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.sunny),
-            label: 'Today',
+            icon: Icon(Icons.home),
+            label: 'Home',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month_outlined),
