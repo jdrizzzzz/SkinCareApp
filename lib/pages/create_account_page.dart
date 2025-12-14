@@ -227,7 +227,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                         await signUp(); // if this fails, it jumps to catch
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const LoginPage()),
+                          MaterialPageRoute(builder: (context) => const WeatherPage()),
                         );
                       } on FirebaseAuthException catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(

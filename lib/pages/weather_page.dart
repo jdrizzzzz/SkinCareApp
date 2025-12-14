@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import '../models/weather_model.dart';
@@ -17,20 +18,8 @@ class WeatherPage extends StatefulWidget {
 class _WeatherPageState extends State<WeatherPage> {
   //Functions------------------------------------
 
-  // For the bottomnavigationbar
-  int _selectedIndex = 0;
-
-  //final List<Widget> _screens = const [
-  //  HomeScreen(),
-  //  RoutineScreen(),
-  //  ProductsScreen(),
-  //  ProfileScreen(),
-  //];
-
-
-
   //apiKey
-  final weatherService = WeatherService('70bfb62eb9754779b4305934250512');
+  final weatherService = WeatherService(dotenv.env['WEATHER_API_KEY'] ?? '');
   Weather? _weather;
 
   //fetch weather
@@ -60,7 +49,7 @@ class _WeatherPageState extends State<WeatherPage> {
     switch (airQualityIndex){
       case 1:
       case 2:
-      return 'Good';
+        return 'Good';
       case 3:
       case 4:
         return 'Moderate';
@@ -110,36 +99,6 @@ class _WeatherPageState extends State<WeatherPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        selectedItemColor: Colors.amber,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month_outlined),
-            label: 'Routine',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_basket),
-            label: 'Products',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
-
       backgroundColor: Colors.grey[100],
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 60),
@@ -151,34 +110,17 @@ class _WeatherPageState extends State<WeatherPage> {
                 children:[
                   //title and the city name
                   Text(
-              _weather == null ? "Loading..." : "Today in ${_weather!.cityName}",//! null-assertion(assured its not null)
-                style: TextStyle(
-                    fontWeight: FontWeight.bold),
+                    _weather == null ? "Loading..." : "Today in ${_weather!.cityName}",//! null-assertion(assured its not null)
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold),
                   ),
                   //condition of weather
                   Text('${_weather?.mainCondition}'),
                   //animation for the weather
                   SizedBox(
-                    height:200,
-                      width:200,
+                      height:350,
+                      width:350,
                       child: Lottie.asset(getWeatherAnimation(_weather?.mainCondition))       //weather icon
-                  ),
-                  SizedBox(
-                      height:90,
-                      width: double.infinity,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.orange[50],
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Center(
-                            child: Text("Today's Tip",
-                              style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,), // -------USE AI RECOMMENDATION HERE
-                            ),
-                        ),
-                      ),
                   ),
                 ],
               ),
@@ -214,7 +156,7 @@ class _WeatherPageState extends State<WeatherPage> {
                             ),
                             Text(
                               _weather == null ? "--°C" : "${_weather!.temperature.round()}°C",
-                                style: TextStyle(fontWeight: FontWeight.w900,fontSize: 24),
+                              style: TextStyle(fontWeight: FontWeight.w900,fontSize: 24),
                             ),
                           ],
                         ),
@@ -249,7 +191,7 @@ class _WeatherPageState extends State<WeatherPage> {
                             ),
                             Text(
                                 _weather == null ? "--%" : "${_weather!.humidity}%",
-                              style: TextStyle(fontWeight: FontWeight.w900,fontSize: 24)
+                                style: TextStyle(fontWeight: FontWeight.w900,fontSize: 24)
                             ),
                           ],
                         ),
@@ -335,28 +277,6 @@ class _WeatherPageState extends State<WeatherPage> {
               ],
             ),
             const SizedBox(height: 10),
-
-            SizedBox(
-              height: 70,
-              width: double.infinity,
-              child: TextButton(
-                onPressed: () {
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.orange[50],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                child: const Text(
-                  "View your progress",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
 
           ],
         ),

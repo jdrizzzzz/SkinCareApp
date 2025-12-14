@@ -1,15 +1,15 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:skincare_project/pages/create_account_page.dart';
 import 'package:skincare_project/pages/weather_page.dart';
 import 'pages/login_page.dart';
 
 
-void main() async{
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await Firebase.initializeApp();
-
+  await dotenv.load(fileName: ".env");              // load .env
+  await Firebase.initializeApp();                   //load firebase
   runApp(const MyApp());
 }
 
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const CreateAccountPage(),
+      home: const WeatherPage(),
         routes:{
         '/loginpage' :(context) => LoginPage(),
           '/createaccountpage' :(context) => CreateAccountPage(),
