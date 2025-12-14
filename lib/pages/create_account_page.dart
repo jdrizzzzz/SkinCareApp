@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:skincare_project/pages/weather_page.dart';
 
 import 'login_page.dart';
 
@@ -14,7 +15,7 @@ class CreateAccountPage extends StatefulWidget {
 class _CreateAccountPageState extends State<CreateAccountPage> {
   //Functions here
 
-  //text controllers
+  //text controllers - storing the text typed
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -23,6 +24,14 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   bool _obscurePassword = true;
   bool _passwordsMatch = false;
   bool _showPasswordError = false;
+
+  //Creating the account in firebase
+  Future<void> signUp() async {
+    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,14 +127,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 controller: _passwordController,
                 obscureText: _obscurePassword,
                 style: const TextStyle(color: Colors.white),
-                onChanged: (_){
-                  setState(() {
-                    _passwordsMatch =
-                        _passwordController.text == _confirmPasswordController.text &&
-                        _passwordController.text.isNotEmpty;
-                    _showPasswordError = !_passwordsMatch;
-                  });
-                },
                 decoration: InputDecoration(
                   hintText: "Enter your password",
                   hintStyle: const TextStyle(color: Colors.white38),
@@ -171,7 +172,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     _passwordsMatch =
                         _passwordController.text == _confirmPasswordController.text &&
                             _confirmPasswordController.text.isNotEmpty;
-                    _showPasswordError =!_passwordsMatch;
+                    _showPasswordError =
+                        _confirmPasswordController.text.isNotEmpty && !_passwordsMatch;
                   });
                 },
                 obscureText: _obscurePassword,
@@ -220,8 +222,18 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 child: IgnorePointer(
                   ignoring: !_passwordsMatch, // blocks taps until passwords match
                   child: ElevatedButton(
-                    onPressed: () {
-
+                    onPressed: () async {
+                      try {
+                        await signUp(); // if this fails, it jumps to catch
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const LoginPage()),
+                        );
+                      } on FirebaseAuthException catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(e.message ?? "Sign up failed")),
+                        );
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFFC933),
