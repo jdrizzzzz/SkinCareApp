@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'login_page.dart';
 
 class CreateAccountPage extends StatefulWidget {
   const CreateAccountPage({super.key});
@@ -19,6 +22,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   //for password
   bool _obscurePassword = true;
   bool _passwordsMatch = false;
+  bool _showPasswordError = false;
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +123,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     _passwordsMatch =
                         _passwordController.text == _confirmPasswordController.text &&
                         _passwordController.text.isNotEmpty;
+                    _showPasswordError = !_passwordsMatch;
                   });
                 },
                 decoration: InputDecoration(
@@ -160,11 +165,13 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               ),
               const SizedBox(height: 8),
               TextField(
+                controller: _confirmPasswordController,
                 onChanged: (_) {
                   setState(() {
                     _passwordsMatch =
                         _passwordController.text == _confirmPasswordController.text &&
                             _confirmPasswordController.text.isNotEmpty;
+                    _showPasswordError =!_passwordsMatch;
                   });
                 },
                 obscureText: _obscurePassword,
@@ -197,28 +204,38 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                   ),
                 ),
               ),
+              if (_showPasswordError)
+                const Padding(
+                  padding: EdgeInsets.only(top: 6, left: 4),
+                  child: Text(
+                    "Passwords do not match",
+                    style: TextStyle(color: Colors.red, fontSize: 12),
+                  ),
+                ),
               const SizedBox(height: 40),
 
               // Sign up button
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _passwordsMatch ? () {
+                child: IgnorePointer(
+                  ignoring: !_passwordsMatch, // blocks taps until passwords match
+                  child: ElevatedButton(
+                    onPressed: () {
 
-                  }
-                  : null, //disable button until passwords match
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFC933),
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFFC933),
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    "Sign up",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
+                    child: const Text(
+                      "Sign up",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -236,7 +253,14 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginPage(),
+                        ),
+                      );
+                    },
                     style: TextButton.styleFrom(
                       padding: EdgeInsets.zero,
                       minimumSize: const Size(0, 0),

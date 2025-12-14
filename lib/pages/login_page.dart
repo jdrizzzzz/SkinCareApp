@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:skincare_project/pages/create_account_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -278,7 +279,14 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CreateAccountPage(),
+                        ),
+                      );
+                    },
                     style: TextButton.styleFrom(
                       padding: EdgeInsets.zero,
                       minimumSize: const Size(0, 0),
