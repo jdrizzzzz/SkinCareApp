@@ -10,8 +10,15 @@ class CreateAccountPage extends StatefulWidget {
 
 class _CreateAccountPageState extends State<CreateAccountPage> {
   //Functions here
-  bool _obscurePassword = true;
 
+  //text controllers
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  //for password
+  bool _obscurePassword = true;
+  bool _passwordsMatch = false;
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +82,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               ),
               const SizedBox(height: 8),
               TextField(
+                controller: _emailController,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: "Enter your email",
@@ -103,8 +111,16 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               ),
               const SizedBox(height: 8),
               TextField(
+                controller: _passwordController,
                 obscureText: _obscurePassword,
                 style: const TextStyle(color: Colors.white),
+                onChanged: (_){
+                  setState(() {
+                    _passwordsMatch =
+                        _passwordController.text == _confirmPasswordController.text &&
+                        _passwordController.text.isNotEmpty;
+                  });
+                },
                 decoration: InputDecoration(
                   hintText: "Enter your password",
                   hintStyle: const TextStyle(color: Colors.white38),
@@ -144,6 +160,13 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               ),
               const SizedBox(height: 8),
               TextField(
+                onChanged: (_) {
+                  setState(() {
+                    _passwordsMatch =
+                        _passwordController.text == _confirmPasswordController.text &&
+                            _confirmPasswordController.text.isNotEmpty;
+                  });
+                },
                 obscureText: _obscurePassword,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
@@ -180,8 +203,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                  },
+                  onPressed: _passwordsMatch ? () {
+
+                  }
+                  : null, //disable button until passwords match
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFFC933),
                     foregroundColor: Colors.black,
