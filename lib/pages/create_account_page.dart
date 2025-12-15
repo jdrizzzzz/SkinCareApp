@@ -33,6 +33,15 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     );
   }
 
+  @override                                          //remove the
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -225,10 +234,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     onPressed: () async {
                       try {
                         await signUp(); // if this fails, it jumps to catch
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const WeatherPage()),
-                        );
+                        Navigator.pushReplacementNamed(context, '/weatherpage'); //replace current page (user cant go back to signup)
                       } on FirebaseAuthException catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(e.message ?? "Sign up failed")),

@@ -8,8 +8,8 @@ import 'pages/login_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");              // load .env
-  await Firebase.initializeApp();                   //load firebase
+  await dotenv.load(fileName: ".env");              // load .env first
+  await Firebase.initializeApp();                   //initialize firebase once globally
   runApp(const MyApp());
 }
 
