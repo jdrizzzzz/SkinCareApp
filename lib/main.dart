@@ -6,7 +6,7 @@ import 'package:skincare_project/pages/weather_page.dart';
 import 'pages/login_page.dart';
 
 
-Future<void> main() async {
+Future<void> main() async {   //waits for env and firebase to load until UI is started
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");              // load .env first
   await Firebase.initializeApp();                   //initialize firebase once globally
@@ -20,11 +20,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const WeatherPage(),
+      home: const CreateAccountPage(),
         routes:{
         '/loginpage' :(context) => LoginPage(),
           '/createaccountpage' :(context) => CreateAccountPage(),
-        '/weatherpage' :(context) => WeatherPage(),
+          '/weatherpage' :(context) => WeatherPage(),
         }
     );
   }

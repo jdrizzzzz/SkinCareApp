@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:skincare_project/pages/weather_page.dart';
 
 import 'login_page.dart';
 
@@ -15,32 +14,31 @@ class CreateAccountPage extends StatefulWidget {
 class _CreateAccountPageState extends State<CreateAccountPage> {
   //Functions here
 
-  //text controllers - storing the text typed
+  //text controllers - storing what the user types
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  //for password
+  //password visibility + validation state
   bool _obscurePassword = true;
   bool _passwordsMatch = false;
   bool _showPasswordError = false;
 
-  //Creating the account in firebase
+  //creating the account in firebase
   Future<void> signUp() async {
     await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
     );
   }
 
-  @override                                          //remove the
-  void dispose() {
+  @override
+  void dispose() { //clean up controllers when leaving this page
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +53,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // the title and the icon
                   CircleAvatar(
                     radius: 20.0,
                     backgroundColor: Colors.transparent,
@@ -94,7 +91,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               ),
               const SizedBox(height: 40),
 
-              // Email text and textbox
               const Text(
                 "Email",
                 style: TextStyle(
@@ -123,7 +119,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               ),
               const SizedBox(height: 16),
 
-              // Password text and textbox
               const Text(
                 "Password",
                 style: TextStyle(
@@ -178,11 +173,15 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 controller: _confirmPasswordController,
                 onChanged: (_) {
                   setState(() {
+                    //check if passwords match while typing
                     _passwordsMatch =
-                        _passwordController.text == _confirmPasswordController.text &&
+                        _passwordController.text ==
+                            _confirmPasswordController.text &&
                             _confirmPasswordController.text.isNotEmpty;
+
                     _showPasswordError =
-                        _confirmPasswordController.text.isNotEmpty && !_passwordsMatch;
+                        _confirmPasswordController.text.isNotEmpty &&
+                            !_passwordsMatch;
                   });
                 },
                 obscureText: _obscurePassword,
@@ -215,7 +214,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                   ),
                 ),
               ),
-              if (_showPasswordError)
+
+              if (_showPasswordError)            //password mismatch message
                 const Padding(
                   padding: EdgeInsets.only(top: 6, left: 4),
                   child: Text(
@@ -225,26 +225,29 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 ),
               const SizedBox(height: 40),
 
-              // Sign up button
+              //sign up button
               SizedBox(
                 width: double.infinity,
                 child: IgnorePointer(
-                  ignoring: !_passwordsMatch, // blocks taps until passwords match
+                  ignoring: !_passwordsMatch, //disable button until passwords match
                   child: ElevatedButton(
                     onPressed: () async {
                       try {
-                        await signUp(); // if this fails, it jumps to catch
-                        Navigator.pushReplacementNamed(context, '/weatherpage'); //replace current page (user cant go back to signup)
-                      } on FirebaseAuthException catch (e) {
+                        await signUp(); //firebase account creation
+                        Navigator.pushReplacementNamed(context, '/weatherpage',);
+                      } on FirebaseAuthException catch (e) { //show error message from firebase
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(e.message ?? "Sign up failed")),
+                          SnackBar(
+                            content: Text(e.message ?? "Sign up failed"),
+                          ),
                         );
                       }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFFC933),
                       foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding:
+                      const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -260,7 +263,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               ),
               const SizedBox(height: 60),
 
-              // "Have an account" row
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -275,20 +277,23 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const LoginPage(),
+                          builder: (context) =>
+                          const LoginPage(),
                         ),
                       );
                     },
                     style: TextButton.styleFrom(
                       padding: EdgeInsets.zero,
                       minimumSize: const Size(0, 0),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      tapTargetSize:
+                      MaterialTapTargetSize.shrinkWrap,
                     ),
-                    child: Text(
+                    child: const Text(
                       "Log In",
                       style: TextStyle(
                         color: Colors.amber,
-                        decoration: TextDecoration.underline,
+                        decoration:
+                        TextDecoration.underline,
                       ),
                     ),
                   ),
@@ -310,13 +315,15 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     style: TextButton.styleFrom(
                       padding: EdgeInsets.zero,
                       minimumSize: const Size(0, 0),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      tapTargetSize:
+                      MaterialTapTargetSize.shrinkWrap,
                     ),
-                    child: Text(
+                    child: const Text(
                       "Terms of Service ",
                       style: TextStyle(
                         color: Colors.white,
-                        decoration: TextDecoration.underline,
+                        decoration:
+                        TextDecoration.underline,
                       ),
                     ),
                   ),
@@ -328,27 +335,25 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                   ),
                 ],
               ),
-
               Center(
                 child: TextButton(
                   onPressed: () {},
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
                     minimumSize: const Size(0, 0),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    tapTargetSize:
+                    MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: Text(
+                  child: const Text(
                     "Privacy Policy.",
                     style: TextStyle(
                       color: Colors.white,
-                      decoration: TextDecoration.underline,
+                      decoration:
+                      TextDecoration.underline,
                     ),
                   ),
                 ),
               ),
-
-
-
             ],
           ),
         ),
