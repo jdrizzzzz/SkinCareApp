@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
-import 'quiz_models.dart';
-import 'quiz_section1.dart';
-import 'quiz_section2.dart';
-import 'quiz_section3.dart';
-import 'quiz_section4_5.dart';
+import '../models/quiz_models.dart';
+import '../Quiz/quiz_section1.dart';
+import '../Quiz/quiz_section2.dart';
+import '../Quiz/quiz_section3.dart';
+import '../Quiz/quiz_section4_5.dart';
 
 class SkinCareQuizScreen extends StatefulWidget {
   const SkinCareQuizScreen({Key? key}) : super(key: key);

@@ -1,4 +1,4 @@
-import 'quiz_models.dart';
+import '../models/quiz_models.dart';
 
 List<QuizQuestion> buildSection3Questions() {
   return const [

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:skincare_project/Quiz/user_quiz.dart';
+import 'package:skincare_project/pages/user_quiz.dart';
 
 class QuizStartScreen extends StatelessWidget {
   const QuizStartScreen({super.key});
