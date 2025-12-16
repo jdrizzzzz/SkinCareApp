@@ -1,103 +1,10 @@
 import 'package:flutter/material.dart';
+import '../constants/brand_colors.dart';
+import '../models/quiz_question.dart';
 
-/// Brand colors (shared)
-const Color bgColor = Color(0xFFF5EBE0); // Light beige
-const Color accentColor = Color(0xFFF2C94C); // Warm yellow
-const Color accentDark = Color(0xFFE0B34B);
-const Color cardColor = Colors.white;
-const Color textColor = Color(0xFF333333);
+// change this import path/name to your real WeatherPage file
+import '../pages/weather_page.dart';
 
-/// Quiz question model
-class QuizQuestion {
-  final String sectionTitle;
-  final String question;
-  final String? subtitle;
-  final bool isMultiSelect;
-  final List<String> options;
-  final String? unsureOption;
-  final bool isLocationStep; // special climate/location step
-
-  const QuizQuestion({
-    required this.sectionTitle,
-    required this.question,
-    this.subtitle,
-    required this.isMultiSelect,
-    required this.options,
-    this.unsureOption,
-    this.isLocationStep = false,
-  });
-}
-
-/// Card widget used for each option tile
-class OptionCard extends StatelessWidget {
-  final String text;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const OptionCard({
-    Key? key,
-    required this.text,
-    required this.selected,
-    required this.onTap,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? accentColor : Colors.transparent,
-            width: 2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: bgColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.spa,
-                size: 22,
-                color: accentDark,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                text,
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Results screen that shows all questions + answers
 class ResultsScreen extends StatelessWidget {
   final List<QuizQuestion> questions;
   final Map<int, List<String>> answers;
@@ -147,11 +54,11 @@ class ResultsScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
+
               ...List.generate(questions.length, (index) {
                 final q = questions[index];
                 final ans = answers[index] ?? [];
-                final answerText =
-                ans.isEmpty ? "No answer" : ans.join(', ');
+                final answerText = ans.isEmpty ? "No answer" : ans.join(', ');
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
@@ -183,7 +90,9 @@ class ResultsScreen extends StatelessWidget {
                   ),
                 );
               }),
+
               const SizedBox(height: 24),
+
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(18),
@@ -221,12 +130,16 @@ class ResultsScreen extends StatelessWidget {
                   ],
                 ),
               ),
+
               const SizedBox(height: 24),
+
+              // button 1: redo quiz (go back)
               SizedBox(
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
+                  // pop = go back to quiz screen (so user can redo it)
                   style: ElevatedButton.styleFrom(
                     backgroundColor: accentColor,
                     foregroundColor: Colors.black,
@@ -236,7 +149,38 @@ class ResultsScreen extends StatelessWidget {
                     elevation: 0,
                   ),
                   child: const Text(
-                    'Back to Quiz',
+                    'Redo Quiz',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // button 2: continue to weather page
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: OutlinedButton(
+                  onPressed: () {
+                    // go to weather page after quiz is confirmed
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const WeatherPage()),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    side: const BorderSide(color: accentDark, width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: const Text(
+                    'Continue',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,

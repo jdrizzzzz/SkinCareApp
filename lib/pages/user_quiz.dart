@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:skincare_project/pages/results_screen.dart';
+import 'package:skincare_project/pages/wdigets/option_card.dart';
 
-import '../models/quiz_models.dart';
+import '../constants/brand_colors.dart';
+import '../models/quiz_question.dart';
 import '../Quiz/quiz_section1.dart';
 import '../Quiz/quiz_section2.dart';
 import '../Quiz/quiz_section3.dart';
