@@ -188,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: Text(
                       "Forgot password?",
                       style: TextStyle(
-                        color: Colors.grey[400],
+                        color: Colors.white,
                         decoration: TextDecoration.underline,
                       ),
                     ),
@@ -314,10 +314,10 @@ class _LoginPageState extends State<LoginPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
+                     Text(
                       "Don't have an account? ",
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Colors.grey[400],
                       ),
                     ),
                     TextButton(
@@ -332,7 +332,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: Text(
                         "Create one",
                         style: TextStyle(
-                          color: Colors.grey[400],
+                          color: Colors.white,
                           decoration: TextDecoration.underline,
                         ),
                       ),

@@ -234,7 +234,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     onPressed: () async {
                       try {
                         await signUp(); //firebase account creation
-                        Navigator.pushReplacementNamed(context, '/weatherpage',);
+                        Navigator.pushReplacementNamed(context, '/quiz',);
                       } on FirebaseAuthException catch (e) { //show error message from firebase
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
