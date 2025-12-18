@@ -21,7 +21,7 @@ class ProfilePage extends StatelessWidget {
           icon: const Icon(Icons.logout),
           onPressed: (){
             signUserOut();
-            Navigator.pushReplacementNamed(context, '/loginpage',);
+            Navigator.pushReplacementNamed(context, '/loginpage');
     },
         ),
       ]),
