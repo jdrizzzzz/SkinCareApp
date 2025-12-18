@@ -7,32 +7,162 @@ class ProfilePage extends StatelessWidget {
   final user = FirebaseAuth.instance.currentUser!;
 
   // sign user out
-  void signUserOut() {
-    FirebaseAuth.instance.signOut();
+  Future<void> signUserOut() async {
+    await FirebaseAuth.instance.signOut();
+  }
 
+  Future<void> deleteAccountWithPassword({
+    required String email,
+    required String password,
+  }) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return;
+
+    final credential = EmailAuthProvider.credential(
+      email: email,
+      password: password,
+    );
+
+    await currentUser.reauthenticateWithCredential(credential);
+    await currentUser.delete();
+  }
+
+  Future<String?> _askForPassword(BuildContext context) async {
+    final controller = TextEditingController();
+
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm account deletion'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Please enter your password to delete your account.',
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, null),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMessage(BuildContext context, String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          actions: [
-        IconButton(
-          icon: const Icon(Icons.logout),
-          onPressed: (){
-            signUserOut();
-            Navigator.pushReplacementNamed(context, '/loginpage');
-    },
-        ),
-      ]),
-      body: Center(
-        child: Text(
-          'Logged in as ' + user.email!,
-          style: TextStyle(
-              fontSize: 20
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await signUserOut();
+              Navigator.pushReplacementNamed(context, '/loginpage');
+            },
           ),
+        ],
+      ),
+
+      // body
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Logged in as ${user.email}',
+              style: const TextStyle(fontSize: 20),
+            ),
+            const SizedBox(height: 24),
+
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Delete account'),
+              onPressed: () async {
+                final email = user.email;
+                if (email == null) {
+                  _showMessage(context, "This account doesn't have an email.");
+                  return;
+                }
+
+                // Verify current user first
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Delete account?'),
+                    content: const Text(
+                      'This action is permanent. Are you sure you want to delete your account?',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text('Continue'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirm != true) return;
+
+                // Ask for password
+                final password = await _askForPassword(context);
+                if (password == null || password.isEmpty) return;
+
+                // Delete account
+                try {
+                  await deleteAccountWithPassword(email: email, password: password);
+
+                  // Sign out locally after deletion
+                  await FirebaseAuth.instance.signOut();
+
+                  Navigator.pushReplacementNamed(context, '/loginpage');
+                } on FirebaseAuthException catch (e) {
+                  if (e.code == 'wrong-password') {
+                    _showMessage(context, 'Wrong password.');
+                  } else if (e.code == 'requires-recent-login') {
+                    _showMessage(context, 'Please log in again, then try deleting.');
+                  } else {
+                    _showMessage(context, 'Delete failed: ${e.message}');
+                  }
+                } catch (e) {
+                  _showMessage(context, 'Delete failed: $e');
+                }
+              },
+            ),
+          ],
         ),
       ),
+
+      // bottom navigation bar
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         showSelectedLabels: true,
@@ -41,21 +171,13 @@ class ProfilePage extends StatelessWidget {
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
+              icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: 'Routine',
-          ),
+              icon: Icon(Icons.calendar_month), label: 'Routine'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_basket),
-            label: 'Products',
-          ),
+              icon: Icon(Icons.shopping_basket), label: 'Products'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+              icon: Icon(Icons.person), label: 'Profile'),
         ],
         currentIndex: 3,
         onTap: (index) {
