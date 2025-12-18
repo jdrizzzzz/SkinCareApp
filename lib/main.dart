@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:skincare_project/pages/create_account_page.dart';
+import 'package:skincare_project/pages/profile_page.dart';
 import 'package:skincare_project/pages/quiz_start_screen.dart';
 import 'package:skincare_project/pages/weather_page.dart';
 import 'pages/login_page.dart';
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
           '/createaccountpage' :(context) => CreateAccountPage(),
           '/weatherpage' :(context) => WeatherPage(),
           '/quiz' :(context) => QuizStartScreen(),
+          '/profile' :(context) => ProfilePage(),
         }
     );
   }
