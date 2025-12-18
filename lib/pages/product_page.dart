@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:skincare_project/pages/widgets/product_card.dart';
 import '../models/product.dart';
+import '../services/product_service.dart';
 
 class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
@@ -11,15 +11,7 @@ class ProductPage extends StatefulWidget {
 }
 
 class _ProductPageState extends State<ProductPage> {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-
-  Future<List<Product>> fetchProducts() async {
-    final snapshot = await _db.collection('products').limit(50).get();
-
-    return snapshot.docs
-        .map((doc) => Product.fromFirestore(doc.id, doc.data()))
-        .toList();
-  }
+  final ProductService _productService = ProductService();
 
   @override
   Widget build(BuildContext context) {
@@ -30,34 +22,25 @@ class _ProductPageState extends State<ProductPage> {
         elevation: 0,
         title: const Text(
           'Your Recommendations',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
       ),
 
       body: Column(
         children: [
-          // Add Filters (chips)
-
           Expanded(
             child: FutureBuilder<List<Product>>(
-              future: fetchProducts(),
+              future: _productService.fetchProducts(limit: 50),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-
                 if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error: ${snapshot.error}'),
-                  );
+                  return Center(child: Text('Error: ${snapshot.error}'));
                 }
 
                 final products = snapshot.data ?? [];
-
                 if (products.isEmpty) {
                   return const Center(child: Text('No products found.'));
                 }
@@ -65,8 +48,7 @@ class _ProductPageState extends State<ProductPage> {
                 return ListView.builder(
                   itemCount: products.length,
                   itemBuilder: (context, index) {
-                    final product = products[index];
-                    return ProductCard(product: product);
+                    return ProductCard(product: products[index]);
                   },
                 );
               },

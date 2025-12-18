@@ -20,7 +20,8 @@ class ProductCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Placeholder image
+
+          //placeholder until we put the product images
           Container(
             height: 160,
             decoration: BoxDecoration(
@@ -31,7 +32,6 @@ class ProductCard extends StatelessWidget {
               child: Icon(Icons.spa, color: Colors.black26, size: 40),
             ),
           ),
-
           const SizedBox(height: 12),
 
           Text(
@@ -41,14 +41,12 @@ class ProductCard extends StatelessWidget {
               fontSize: 15,
             ),
           ),
-
           const SizedBox(height: 4),
 
           Text(
             product.brand,
             style: const TextStyle(color: Colors.black54),
           ),
-
           const SizedBox(height: 8),
 
           Row(
