@@ -11,6 +11,7 @@ class ProfilePage extends StatelessWidget {
     await FirebaseAuth.instance.signOut();
   }
 
+  //deleting account
   Future<void> deleteAccountWithPassword({
     required String email,
     required String password,
@@ -65,6 +66,25 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
+  // updating/changing password - need old password
+  Future<void> changePassword({
+    required String email,
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final credential = EmailAuthProvider.credential(
+      email: email,
+      password: oldPassword,
+    );
+
+    await user.reauthenticateWithCredential(credential);
+    await user.updatePassword(newPassword);
+  }
+
+
   void _showMessage(BuildContext context, String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(msg)),
@@ -110,6 +130,7 @@ class ProfilePage extends StatelessWidget {
                   return;
                 }
 
+                // ---------------- to delete account----------------
                 // Verify current user first
                 final confirm = await showDialog<bool>(
                   context: context,
@@ -158,6 +179,81 @@ class ProfilePage extends StatelessWidget {
                 }
               },
             ),
+
+            //------------------to change password-----------
+            //Change password - need old password
+            ElevatedButton(
+              child: const Text('Change password'),
+              onPressed: () async {
+                final email = FirebaseAuth.instance.currentUser?.email;
+                if (email == null) return;
+
+                final result = await showDialog<Map<String, String>>(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) {
+                    final oldPasswordController = TextEditingController();
+                    final newPasswordController = TextEditingController();
+
+                    return AlertDialog(
+                      title: const Text('Change password'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextField(
+                            controller: oldPasswordController,
+                            obscureText: true,
+                            decoration: const InputDecoration(
+                              labelText: 'Current password',
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: newPasswordController,
+                            obscureText: true,
+                            decoration: const InputDecoration(
+                              labelText: 'New password',
+                            ),
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, null),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, {
+                            'old': oldPasswordController.text.trim(),
+                            'new': newPasswordController.text.trim(),
+                          }),
+                          child: const Text('Update'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                if (result == null) return;
+
+                try {
+                  await changePassword(
+                    email: email,
+                    oldPassword: result['old']!,
+                    newPassword: result['new']!,
+                  );
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Password updated')),
+                  );
+                } on FirebaseAuthException catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(e.message ?? 'Error')),
+                  );
+                }
+              },
+            ),
+
           ],
         ),
       ),
