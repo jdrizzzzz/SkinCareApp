@@ -5,6 +5,7 @@ import 'package:skincare_project/pages/create_account_page.dart';
 import 'package:skincare_project/pages/product_page.dart';
 import 'package:skincare_project/pages/profile_page.dart';
 import 'package:skincare_project/pages/quiz_start_screen.dart';
+import 'package:skincare_project/pages/routine_page.dart';
 import 'package:skincare_project/pages/weather_page.dart';
 import 'pages/login_page.dart';
 
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const ProductPage(),
+      home: const RoutinePage(),
         routes:{
         '/loginpage' :(context) => LoginPage(),
           '/createaccountpage' :(context) => CreateAccountPage(),
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
           '/quiz' :(context) => QuizStartScreen(),
           '/profile' :(context) => ProfilePage(),
           '/products':(context) => ProductPage(),
+          '/routine' :(context) => RoutinePage(),
         }
     );
   }
