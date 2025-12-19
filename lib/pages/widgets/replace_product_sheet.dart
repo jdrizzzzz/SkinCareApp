@@ -56,7 +56,6 @@ class _ReplaceProductSheetState extends State<ReplaceProductSheet> {
             ),
             const SizedBox(height: 10),
 
-            // Header with CLOSE button so it never feels stuck
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14),
               child: Row(

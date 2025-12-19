@@ -81,7 +81,7 @@ class _ProductPageState extends State<ProductPage> {
             label: 'Profile',
           ),
         ],
-        currentIndex: 0,
+        currentIndex: 2,
         onTap: (index) {
           final routes = ['/weatherpage', '/routine', '/products', '/profile'];
           Navigator.pushNamed(context, routes[index]);

@@ -20,7 +20,7 @@ class RoutineStepCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final productName = step.selectedProduct == null
-        ? 'Tap the 3 dots to choose a product'
+        ? 'Select a product'
         : (step.selectedProduct!.name ?? 'Selected product');
 
     final subtitleStyle = TextStyle(
@@ -53,7 +53,7 @@ class RoutineStepCard extends StatelessWidget {
                   ),
                 ),
 
-                // Icon bubble
+                // Icon
                 Container(
                   width: 44,
                   height: 44,
