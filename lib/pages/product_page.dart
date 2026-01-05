@@ -18,6 +18,7 @@ class _ProductPageState extends State<ProductPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF9F7F4),
       appBar: AppBar(
+        automaticallyImplyLeading: false,  // removes the arrow to navigate back
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(

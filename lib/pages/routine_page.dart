@@ -102,6 +102,7 @@ class _RoutinePageState extends State<RoutinePage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF9F7F4),
       appBar: AppBar(
+        automaticallyImplyLeading: false,  // removes the arrow to navigate back
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,

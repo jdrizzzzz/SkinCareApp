@@ -95,6 +95,7 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,  // removes the arrow to navigate back
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
