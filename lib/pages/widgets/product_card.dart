@@ -10,14 +10,12 @@ class ProductCard extends StatefulWidget {
   State<ProductCard> createState() => _ProductCardState();
 }
 
-//Storing if theyre in the "cart" or not
 class _ProductCardState extends State<ProductCard> {
   bool isInMorningRoutine = false;
   bool isInNightRoutine = false;
 
-  //UI panel for morning or night option (card for when + is clicked)
   void _openRoutineMenu(BuildContext context) {
-    showModalBottomSheet(   //makes user interact with the popup
+    showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -39,7 +37,6 @@ class _ProductCardState extends State<ProductCard> {
                 ),
                 const SizedBox(height: 14),
 
-                // Morning routine toggle
                 ElevatedButton.icon(
                   icon: Icon(
                     isInMorningRoutine
@@ -60,7 +57,6 @@ class _ProductCardState extends State<ProductCard> {
                 ),
                 const SizedBox(height: 10),
 
-                // Night routine toggle
                 ElevatedButton.icon(
                   icon: Icon(
                     isInNightRoutine
@@ -101,7 +97,6 @@ class _ProductCardState extends State<ProductCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image placeholder + add/remove button
           Stack(
             children: [
               Container(
@@ -114,7 +109,6 @@ class _ProductCardState extends State<ProductCard> {
                   child: Icon(Icons.spa, color: Colors.black26, size: 40),
                 ),
               ),
-
               Positioned(
                 top: 10,
                 right: 10,
@@ -160,14 +154,22 @@ class _ProductCardState extends State<ProductCard> {
             widget.product.brand,
             style: const TextStyle(color: Colors.black54),
           ),
-          const SizedBox(height: 8),
+
+          // Labels row (cleanser/toner/moisturizer/etc.)
+          if (widget.product.label.trim().isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Chip(
+              label: Text(widget.product.label),
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
+            ),
+          ],
+          const SizedBox(height: 10),
 
           Row(
             children: [
               if (widget.product.rank != null)
-                Chip(
-                  label: Text('${widget.product.rank!.toStringAsFixed(1)} ★'),
-                ),
+                Chip(label: Text('${widget.product.rank!.toStringAsFixed(1)} ★')),
               const SizedBox(width: 8),
               if (widget.product.price != null)
                 Text('\$${widget.product.price!.toStringAsFixed(2)}'),
