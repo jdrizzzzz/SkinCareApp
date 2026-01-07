@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:skincare_project/pages/widgets/product_card.dart';
 import '../models/product.dart';
 import '../services/product_service.dart';
+import '../services/products_cache.dart';
 
 class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
@@ -11,9 +12,6 @@ class ProductPage extends StatefulWidget {
 }
 
 class _ProductPageState extends State<ProductPage> {
-  final ProductService _productService = ProductService();
-
-  // Cache the Future
   late final Future<List<Product>> _productsFuture;
 
   // Filter state
@@ -24,7 +22,7 @@ class _ProductPageState extends State<ProductPage> {
   @override
   void initState() {
     super.initState();
-    _productsFuture = _productService.fetchProducts(limit: 50);
+    _productsFuture = ProductsCache.instance.getProducts(limit: 200);
   }
 
   bool _matchesFilters(Product p) {

@@ -4,7 +4,7 @@ import '../models/product.dart';
 import '../models/routine_step.dart';
 import '../services/product_service.dart';
 import '../utils/routine_defaults.dart';
-
+import '../services/products_cache.dart';
 import 'widgets/replace_product_sheet.dart';
 
 class RoutinePage extends StatefulWidget {
@@ -15,7 +15,6 @@ class RoutinePage extends StatefulWidget {
 }
 
 class _RoutinePageState extends State<RoutinePage> {
-  final ProductService _productService = ProductService();
 
   RoutineType _routineType = RoutineType.morning;
 
@@ -32,7 +31,7 @@ class _RoutinePageState extends State<RoutinePage> {
   //setting state
   void initState() {
     super.initState();
-    _productsFuture = _productService.fetchProducts(limit: 200);
+    _productsFuture = ProductsCache.instance.getProducts(limit: 200);
 
     _morningSteps = buildMorningSteps();
     _nightSteps = buildNightSteps();
