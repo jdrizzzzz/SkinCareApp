@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:skincare_project/pages/results_screen.dart';
 import 'package:skincare_project/pages/widgets/option_card.dart';
 
@@ -23,8 +22,6 @@ class _SkinCareQuizScreenState extends State<SkinCareQuizScreen> {
   final Map<int, String> _singleAnswers = {};
   final Map<int, Set<String>> _multiAnswers = {};
 
-  bool _isRequestingLocation = false;
-
   late final List<QuizQuestion> _questions = [
     ...buildSection1Questions(),
     ...buildSection2Questions(),
@@ -34,11 +31,6 @@ class _SkinCareQuizScreenState extends State<SkinCareQuizScreen> {
 
   bool _isAnswered(int index) {
     final q = _questions[index];
-
-    if (q.isLocationStep) {
-      final value = _singleAnswers[index];
-      return value != null && value.startsWith("Location:");
-    }
 
     if (!q.isMultiSelect) {
       return _singleAnswers[index] != null;
@@ -85,10 +77,11 @@ class _SkinCareQuizScreenState extends State<SkinCareQuizScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ResultsScreen(
-          questions: _questions,
-          answers: allAnswers,
-        ),
+        builder: (_) =>
+            ResultsScreen(
+              questions: _questions,
+              answers: allAnswers,
+            ),
       ),
     );
   }
@@ -181,9 +174,7 @@ class _SkinCareQuizScreenState extends State<SkinCareQuizScreen> {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: q.isLocationStep
-                  ? _buildLocationStep(_currentIndex)
-                  : SingleChildScrollView(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 16, vertical: 8),
                 child: Column(
@@ -276,142 +267,5 @@ class _SkinCareQuizScreenState extends State<SkinCareQuizScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildLocationStep(int index) {
-    final hasAnswer = _singleAnswers[index];
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Your skin is shaped by your environment — humidity, temperature, UV levels, air quality, and seasonal changes all affect how your barrier behaves.\n\n"
-                "SERUM uses your location only to understand your climate so we can support your skin with clarity, not pressure.\n\n"
-                "To continue, please allow SERUM to detect your local climate automatically.",
-            style: TextStyle(
-              fontSize: 14,
-              color: textColor,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              onPressed:
-              _isRequestingLocation ? null : () => _handleAllowLocation(index),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: accentColor,
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                elevation: 0,
-              ),
-              child: _isRequestingLocation
-                  ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation(Colors.black),
-                ),
-              )
-                  : const Text(
-                "Allow Location",
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-          if (hasAnswer != null && hasAnswer.startsWith("Location:"))
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Text(
-                "Saved: $hasAnswer",
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _handleAllowLocation(int index) async {
-    setState(() {
-      _isRequestingLocation = true;
-    });
-
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Location services are turned off. Please enable them to continue the quiz.',
-            ),
-          ),
-        );
-        setState(() {
-          _isRequestingLocation = false;
-        });
-        return;
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        setState(() {
-          _isRequestingLocation = false;
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'SERUM needs location permission to continue. Please allow access in Settings.',
-            ),
-          ),
-        );
-
-        if (permission == LocationPermission.deniedForever) {
-          await Geolocator.openAppSettings();
-        }
-
-        return;
-      }
-
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
-      setState(() {
-        _isRequestingLocation = false;
-        _singleAnswers[index] = "Location: "
-            "${position.latitude.toStringAsFixed(2)}, "
-            "${position.longitude.toStringAsFixed(2)}";
-      });
-    } catch (_) {
-      setState(() {
-        _isRequestingLocation = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'We couldn’t get your location. Please check your settings and try again.',
-          ),
-        ),
-      );
-    }
   }
 }

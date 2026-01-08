@@ -2,14 +2,6 @@ import '../models/quiz_question.dart';
 
 List<QuizQuestion> buildSection3Questions() {
   return const [
-    // Special climate/location step
-    QuizQuestion(
-      sectionTitle: 'SECTION 3 — Lifestyle & Environment',
-      question: "Would you like SERUM to detect your local climate automatically?",
-      isMultiSelect: false,
-      options: [], // handled specially in main screen
-      isLocationStep: true,
-    ),
     QuizQuestion(
       sectionTitle: 'SECTION 3 — Lifestyle & Environment',
       question: "How would you describe your stress levels lately?",
