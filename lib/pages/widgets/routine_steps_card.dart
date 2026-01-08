@@ -7,6 +7,7 @@ class RoutineStepCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onMoreTap;
   final VoidCallback onDeleteTap;
+  final VoidCallback onClearProductTap;
 
   const RoutineStepCard({
     super.key,
@@ -15,13 +16,14 @@ class RoutineStepCard extends StatelessWidget {
     required this.onTap,
     required this.onMoreTap,
     required this.onDeleteTap,
+    required this.onClearProductTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final productName = step.selectedProduct == null
         ? 'Select a product'
-        : (step.selectedProduct!.name ?? 'Selected product');
+        : step.selectedProduct!.name;
 
     final subtitleStyle = TextStyle(
       color: Colors.black.withOpacity(0.55),
@@ -40,8 +42,6 @@ class RoutineStepCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             child: Row(
               children: [
-
-                // Drag handle
                 ReorderableDragStartListener(
                   index: index,
                   child: Padding(
@@ -53,7 +53,6 @@ class RoutineStepCard extends StatelessWidget {
                   ),
                 ),
 
-                // Icon
                 Container(
                   width: 44,
                   height: 44,
@@ -66,7 +65,6 @@ class RoutineStepCard extends StatelessWidget {
 
                 const SizedBox(width: 12),
 
-                // Title + subtitle
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,7 +87,17 @@ class RoutineStepCard extends StatelessWidget {
                   ),
                 ),
 
-                // Delete button for cards
+                // remove from routine, keep the step
+                if (step.selectedProduct != null)
+                  IconButton(
+                    tooltip: 'Remove selected product',
+                    onPressed: onClearProductTap,
+                    icon: Icon(
+                      Icons.close,
+                      color: Colors.black.withOpacity(0.55),
+                    ),
+                  ),
+
                 IconButton(
                   tooltip: 'Delete step',
                   onPressed: onDeleteTap,
@@ -99,7 +107,6 @@ class RoutineStepCard extends StatelessWidget {
                   ),
                 ),
 
-                // 3 dots - opening product list
                 IconButton(
                   tooltip: 'Replace product',
                   onPressed: onMoreTap,

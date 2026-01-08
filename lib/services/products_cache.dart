@@ -1,6 +1,7 @@
 import '../models/product.dart';
 import '../services/product_service.dart';
 
+//Caches the data from product service
 class ProductsCache {
   ProductsCache._();
   static final ProductsCache instance = ProductsCache._();

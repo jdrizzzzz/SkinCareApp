@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:skincare_project/pages/widgets/routine_steps_card.dart';
 import '../models/product.dart';
 import '../models/routine_step.dart';
-import '../services/product_service.dart';
 import '../utils/routine_defaults.dart';
 import '../services/products_cache.dart';
+import '../services/routine_store.dart';
 import 'widgets/replace_product_sheet.dart';
 
 class RoutinePage extends StatefulWidget {
@@ -15,33 +15,72 @@ class RoutinePage extends StatefulWidget {
 }
 
 class _RoutinePageState extends State<RoutinePage> {
-
   RoutineType _routineType = RoutineType.morning;
 
-  Future<List<Product>>? _productsFuture;
+  late final Future<List<Product>> _productsFuture;
 
-  // lists for each moring/night
   late List<RoutineStep> _morningSteps;
   late List<RoutineStep> _nightSteps;
+
+  final RoutineStore _store = RoutineStore.instance;
 
   List<RoutineStep> get _currentSteps =>
       _routineType == RoutineType.morning ? _morningSteps : _nightSteps;
 
   @override
-  //setting state
   void initState() {
     super.initState();
+
     _productsFuture = ProductsCache.instance.getProducts(limit: 200);
 
     _morningSteps = buildMorningSteps();
     _nightSteps = buildNightSteps();
+
+    // Product page listener
+    _store.morningSelections.addListener(_syncStepsFromStore);
+    _store.nightSelections.addListener(_syncStepsFromStore);
+
+    // Sync once when page first loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _syncStepsFromStore();
+    });
+  }
+
+  @override
+  void dispose() {
+    _store.morningSelections.removeListener(_syncStepsFromStore);
+    _store.nightSelections.removeListener(_syncStepsFromStore);
+    super.dispose();
+  }
+
+  Future<void> _syncStepsFromStore() async {
+    final products = await _productsFuture;
+    if (!mounted) return;
+
+    Product? findById(String id) {
+      for (final p in products) {
+        if (p.id == id) return p;
+      }
+      return null;
+    }
+
+    setState(() {
+      for (final step in _morningSteps) {
+        final selectedId = _store.morningProductForLabel(step.title);
+        step.selectedProduct = selectedId == null ? null : findById(selectedId);
+      }
+
+      for (final step in _nightSteps) {
+        final selectedId = _store.nightProductForLabel(step.title);
+        step.selectedProduct = selectedId == null ? null : findById(selectedId);
+      }
+    });
   }
 
   void _switchRoutine(RoutineType type) {
     setState(() => _routineType = type);
   }
 
-  //Reorder the cards
   void _onReorder(int oldIndex, int newIndex) {
     setState(() {
       if (newIndex > oldIndex) newIndex -= 1;
@@ -51,7 +90,7 @@ class _RoutinePageState extends State<RoutinePage> {
   }
 
   Future<void> _openReplaceSheet(RoutineStep step) async {
-    final products = await _productsFuture!;
+    final products = await _productsFuture;
     if (!mounted) return;
 
     final selected = await showModalBottomSheet<Product>(
@@ -72,10 +111,29 @@ class _RoutinePageState extends State<RoutinePage> {
 
     if (selected != null) {
       setState(() => step.selectedProduct = selected);
+
+      final label = step.title;
+
+      if (_routineType == RoutineType.morning) {
+        _store.setMorning(label: label, productId: selected.id);
+      } else {
+        _store.setNight(label: label, productId: selected.id);
+      }
     }
   }
 
-  //Adding a new step
+  void _clearSelectedProduct(RoutineStep step) {
+    setState(() => step.selectedProduct = null);
+
+    final label = step.title;
+
+    if (_routineType == RoutineType.morning) {
+      _store.removeMorning(label: label);
+    } else {
+      _store.removeNight(label: label);
+    }
+  }
+
   void _addStep() {
     final newId = '${_routineType.name}_${DateTime.now().millisecondsSinceEpoch}';
     setState(() {
@@ -101,7 +159,7 @@ class _RoutinePageState extends State<RoutinePage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF9F7F4),
       appBar: AppBar(
-        automaticallyImplyLeading: false,  // removes the arrow to navigate back
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
@@ -167,17 +225,24 @@ class _RoutinePageState extends State<RoutinePage> {
                   index: index,
                   step: step,
 
-                  // Tap card
                   onTap: () => _openReplaceSheet(step),
-
-                  // 3 dots - list of products
                   onMoreTap: () => _openReplaceSheet(step),
 
-                  // Delete button (trash icon)
+                  // Remove the product from the step but keep it
+                  onClearProductTap: () => _clearSelectedProduct(step),
+
                   onDeleteTap: () {
                     setState(() {
                       _currentSteps.removeAt(index);
                     });
+
+                    // If step deleted, also clear store value for that label
+                    final label = step.title;
+                    if (_routineType == RoutineType.morning) {
+                      _store.removeMorning(label: label);
+                    } else {
+                      _store.removeNight(label: label);
+                    }
                   },
                 );
               },
@@ -204,8 +269,6 @@ class _RoutinePageState extends State<RoutinePage> {
           ),
         ],
       ),
-
-
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         showSelectedLabels: true,
@@ -214,18 +277,10 @@ class _RoutinePageState extends State<RoutinePage> {
         unselectedItemColor: Colors.grey,
         currentIndex: 1,
         items: const [
-          BottomNavigationBarItem(
-              icon: Icon(
-                  Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-              icon: Icon(
-                  Icons.calendar_month), label: 'Routine'),
-          BottomNavigationBarItem(
-              icon: Icon(
-                  Icons.shopping_basket), label: 'Products'),
-          BottomNavigationBarItem(
-              icon: Icon(
-                  Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: 'Routine'),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_basket), label: 'Products'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
         onTap: (index) {
           final routes = ['/weatherpage', '/routine', '/products', '/profile'];

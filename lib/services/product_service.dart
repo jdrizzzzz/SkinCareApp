@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/product.dart';
 
+//Reads from firestore
 class ProductService {
   final FirebaseFirestore _db;
 
