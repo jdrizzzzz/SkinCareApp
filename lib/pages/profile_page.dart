@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -5,6 +6,7 @@ class ProfilePage extends StatelessWidget {
   ProfilePage({super.key});
 
   final user = FirebaseAuth.instance.currentUser!;
+  final _db = FirebaseFirestore.instance;
 
   // sign user out
   Future<void> signUserOut() async {
@@ -26,6 +28,15 @@ class ProfilePage extends StatelessWidget {
 
     await currentUser.reauthenticateWithCredential(credential);
     await currentUser.delete();
+  }
+
+  //Deletes the user info - quiz
+  Future<void> deleteUserData({required String uid}) async {
+    final batch = _db.batch();
+    final userDoc = _db.collection('users').doc(uid);
+    batch.delete(userDoc);
+
+    await batch.commit();
   }
 
   Future<String?> _askForPassword(BuildContext context) async {
@@ -88,6 +99,27 @@ class ProfilePage extends StatelessWidget {
   void _showMessage(BuildContext context, String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(msg)),
+    );
+  }
+
+  void _showBlockingLoader(BuildContext context, String message) {
+    showDialog<void> (
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          content: Row(
+            children: [
+            const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          const SizedBox(width: 16),
+          Expanded(
+              child: Text(message)),
+            ],
+          ),
+        ),
     );
   }
 
@@ -161,13 +193,23 @@ class ProfilePage extends StatelessWidget {
 
                 // Delete account
                 try {
+                  _showBlockingLoader(context, 'Deleting your account...');
+
+                  await deleteUserData(uid: user.uid);
                   await deleteAccountWithPassword(email: email, password: password);
 
                   // Sign out locally after deletion
                   await FirebaseAuth.instance.signOut();
 
-                  Navigator.pushReplacementNamed(context, '/loginpage');
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    _showMessage(context, 'Account deleted.');
+                    Navigator.pushReplacementNamed(context, '/loginpage');
+                  }
                 } on FirebaseAuthException catch (e) {
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
                   if (e.code == 'wrong-password') {
                     _showMessage(context, 'Wrong password.');
                   } else if (e.code == 'requires-recent-login') {
@@ -176,6 +218,9 @@ class ProfilePage extends StatelessWidget {
                     _showMessage(context, 'Delete failed: ${e.message}');
                   }
                 } catch (e) {
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
                   _showMessage(context, 'Delete failed: $e');
                 }
               },
