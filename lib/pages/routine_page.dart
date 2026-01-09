@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:skincare_project/pages/widgets/label_picker_sheet.dart';
 import 'package:skincare_project/pages/widgets/routine_steps_card.dart';
 import '../models/product.dart';
 import '../models/routine_step.dart';
+import '../utils/product_labels.dart';
 import '../utils/routine_defaults.dart';
 import '../services/products_cache.dart';
 import '../services/routine_store.dart';
@@ -134,13 +136,44 @@ class _RoutinePageState extends State<RoutinePage> {
     }
   }
 
-  void _addStep() {
+  Future<void> _addStep() async {
+    final products = await _productsFuture;
+    if (!mounted) return;
+
+    final allLabels = extractProductLabels(products);
+
+    final usedLabels = _currentSteps
+        .map((s) => s.title.trim().toLowerCase())
+        .toSet();
+
+    final availableLabels = allLabels
+        .where((l) => !usedLabels.contains(l.trim().toLowerCase()))
+        .toList();
+
+    if (availableLabels.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('All labels are already used.')),
+      );
+      return;
+    }
+
+    final selectedLabel = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (context) => LabelPickerSheet(labels: availableLabels),
+    );
+
+    if (selectedLabel == null) return;
     final newId = '${_routineType.name}_${DateTime.now().millisecondsSinceEpoch}';
     setState(() {
       _currentSteps.add(
         RoutineStep(
           id: newId,
-          title: 'New Step',
+          title: selectedLabel,
           icon: Icons.add_circle_outline,
           cardColor: _routineType == RoutineType.morning
               ? const Color(0xFFF3D7D7)
