@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/brand_colors.dart';
 import '../models/quiz_question.dart';
+import '../services/quiz_service.dart';
 
 // change this import path/name to your real WeatherPage file
 import '../pages/weather_page.dart';
@@ -165,13 +166,23 @@ class ResultsScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 52,
                 child: OutlinedButton(
-                  onPressed: () {
-                    // go to weather page after quiz is confirmed
+                  onPressed: () async {
+                    final quizService = QuizService();
+
+                    //answers to firestore
+                    final Map<String, dynamic> answersToSave = answers.map(
+                        (key, value) => MapEntry(key.toString(), value),
+                    );
+
+                    await quizService.saveQuizAnswers(answersToSave);
+
                     Navigator.pushReplacement(
                       context,
+                      // go to weather page after quiz is confirmed
                       MaterialPageRoute(builder: (_) => const WeatherPage()),
                     );
                   },
+
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.black,
                     side: const BorderSide(color: accentDark, width: 1.5),

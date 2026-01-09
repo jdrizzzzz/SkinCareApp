@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+//Holds user routine choice's in memory
 class RoutineStore {
   RoutineStore._();
   static final RoutineStore instance = RoutineStore._();
