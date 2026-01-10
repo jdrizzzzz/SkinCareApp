@@ -66,7 +66,54 @@ class _RoutinePageState extends State<RoutinePage> {
       return null;
     }
 
+    String normalizeLabel(String label) => label.trim().toLowerCase();
+
+    int labelHash(String label) {
+      var hash = 0;
+      for (final code in label.codeUnits) {
+        hash = (hash * 31 + code) & 0x7fffffff;
+      }
+      return hash;
+    }
+
+    final selectedMorningLabels =
+    _store.morningSelections.value.keys.map(normalizeLabel).toSet();
+    final selectedNightLabels =
+    _store.nightSelections.value.keys.map(normalizeLabel).toSet();
+
+    final existingMorningLabels =
+    _morningSteps.map((s) => normalizeLabel(s.title)).toSet();
+    final existingNightLabels =
+    _nightSteps.map((s) => normalizeLabel(s.title)).toSet();
+
+    final missingMorningLabels =
+    selectedMorningLabels.difference(existingMorningLabels);
+    final missingNightLabels =
+    selectedNightLabels.difference(existingNightLabels);
+
     setState(() {
+      for (final label in missingMorningLabels) {
+        _morningSteps.add(
+          RoutineStep(
+            id: 'm_custom_${labelHash(label)}',
+            title: label,
+            icon: Icons.add_circle_outline,
+            cardColor: const Color(0xFFF3D7D7),
+          ),
+        );
+      }
+
+      for (final label in missingNightLabels) {
+        _nightSteps.add(
+          RoutineStep(
+            id: 'n_custom_${labelHash(label)}',
+            title: label,
+            icon: Icons.add_circle_outline,
+            cardColor: const Color(0xFFE6E0F2),
+          ),
+        );
+      }
+
       for (final step in _morningSteps) {
         final selectedId = _store.morningProductForLabel(step.title);
         step.selectedProduct = selectedId == null ? null : findById(selectedId);
@@ -77,6 +124,13 @@ class _RoutinePageState extends State<RoutinePage> {
         step.selectedProduct = selectedId == null ? null : findById(selectedId);
       }
     });
+
+    if (missingMorningLabels.isNotEmpty) {
+      _store.setMorningSteps(_morningSteps);
+    }
+    if (missingNightLabels.isNotEmpty) {
+      _store.setNightSteps(_nightSteps);
+    }
   }
 
   void _switchRoutine(RoutineType type) {
