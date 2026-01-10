@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:skincare_project/pages/create_account_page.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:skincare_project/utils/validation.dart';
 
 class LoginPage extends StatefulWidget {
@@ -12,6 +13,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
   //form key - used to run built in validators
   final _formKey = GlobalKey<FormState>();
@@ -19,6 +21,12 @@ class _LoginPageState extends State<LoginPage> {
   //text controllers - storing what the user types
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  @override
+  void initState(){
+    super.initState();
+    _googleSignIn.initialize();
+  }
 
   @override
   void dispose() {                //clean up controllers when leaving this page
@@ -33,6 +41,35 @@ class _LoginPageState extends State<LoginPage> {
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
     );
+  }
+
+  Future<void> signInWithGoogle() async {
+    await _googleSignIn.initialize();
+    final googleUser = await _googleSignIn.authenticate();
+    if (googleUser == null) return;
+
+    final googleAuth = await googleUser.authentication;
+    final credential = GoogleAuthProvider.credential(
+      idToken: googleAuth.idToken,
+    );
+
+    await FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
+  Future<void> signInWithApple() async {
+    final appleCredential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+    );
+
+    final oauthCredential = OAuthProvider('apple.com').credential(
+      idToken: appleCredential.identityToken,
+      accessToken: appleCredential.authorizationCode,
+    );
+
+    await FirebaseAuth.instance.signInWithCredential(oauthCredential);
   }
 
   @override
@@ -266,7 +303,27 @@ class _LoginPageState extends State<LoginPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
+                      GestureDetector(
+                      onTap: () async {
+                        try {
+                          await signInWithGoogle();
+                            if (context.mounted) {
+                              Navigator.pushReplacementNamed(
+                                context,
+                                  '/weatherpage',
+                              );
+                            }
+                        } on FirebaseAuthException catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                e.message ?? "Google sign in failed",
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      child: Container(
                         width: 50,
                         height: 50,
                         decoration: BoxDecoration(
@@ -275,36 +332,59 @@ class _LoginPageState extends State<LoginPage> {
                           border: Border.all(
                             color: Colors.white24,
                             width: 1.5,
-                          ),
-                        ),
+                              ),
+                            ),
                         child: Center(
                           child: Image.asset(
                             'images/google_icon.png',
                             width: 26,
                             height: 26,
                             fit: BoxFit.contain,
+                            ),
                           ),
                         ),
                       ),
                       const SizedBox(width: 30),
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFF1A1A1A),
-                          border: Border.all(
-                            color: Colors.white24,
-                            width: 1.5,
+
+                      GestureDetector(
+                        onTap: () async {
+                          try {
+                            await signInWithApple();
+                            if (context.mounted) {
+                              Navigator.pushReplacementNamed(
+                                context,
+                                '/weatherpage',
+                              );
+                            }
+                          } on FirebaseAuthException catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  e.message ?? "Apple sign in failed",
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        child: Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0xFF1A1A1A),
+                            border: Border.all(
+                              color: Colors.white24,
+                              width: 1.5,
+                            ),
                           ),
-                        ),
-                        child: Center(
-                          child: Image.asset(
-                            'images/apple_icon.png',
-                            width: 26,
-                            height: 26,
-                            fit: BoxFit.contain,
-                            color: Colors.white,
+                          child: Center(
+                            child: Image.asset(
+                              'images/apple_icon.png',
+                              width: 26,
+                              height: 26,
+                              fit: BoxFit.contain,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),

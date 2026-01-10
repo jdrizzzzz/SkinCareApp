@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class ProfilePage extends StatelessWidget {
   ProfilePage({super.key});
@@ -28,6 +30,77 @@ class ProfilePage extends StatelessWidget {
 
     await currentUser.reauthenticateWithCredential(credential);
     await currentUser.delete();
+  }
+
+  Future<void> reauthenticateForSensitiveAction(
+      BuildContext context,
+      ) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return;
+
+    final providerIds = currentUser.providerData
+        .map((provider) => provider.providerId)
+        .toList();
+
+    if (providerIds.contains('password')) {
+      final email = currentUser.email;
+      if (email == null) {
+        throw FirebaseAuthException(
+          code: 'missing-email',
+          message: "This account doesn't have an email.",
+        );
+      }
+
+      final password = await _askForPassword(context);
+      if (password == null || password.isEmpty) {
+        throw FirebaseAuthException(
+          code: 'missing-password',
+          message: 'Password is required to continue.',
+        );
+      }
+
+      final credential = EmailAuthProvider.credential(
+        email: email,
+        password: password,
+      );
+      await currentUser.reauthenticateWithCredential(credential);
+      return;
+    }
+
+    if (providerIds.contains('google.com')) {
+      await GoogleSignIn.instance.initialize();
+      final googleUser = await GoogleSignIn.instance.authenticate();
+      if (googleUser == null) {
+        throw FirebaseAuthException(
+          code: 'cancelled',
+          message: 'Google sign in canceled.',
+        );
+      }
+      final googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+      );
+      await currentUser.reauthenticateWithCredential(credential);
+      return;
+    }
+
+    if (providerIds.contains('apple.com')) {
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [AppleIDAuthorizationScopes.email],
+      );
+
+      final credential = OAuthProvider('apple.com').credential(
+        idToken: appleCredential.identityToken,
+        accessToken: appleCredential.authorizationCode,
+      );
+      await currentUser.reauthenticateWithCredential(credential);
+      return;
+    }
+
+    throw FirebaseAuthException(
+      code: 'unsupported-provider',
+      message: 'Unsupported sign-in provider.',
+    );
   }
 
   //Deletes the user info - quiz
@@ -157,11 +230,6 @@ class ProfilePage extends StatelessWidget {
               ),
               child: const Text('Delete account'),
               onPressed: () async {
-                final email = user.email;
-                if (email == null) {
-                  _showMessage(context, "This account doesn't have an email.");
-                  return;
-                }
 
                 // ---------------- to delete account----------------
                 // Verify current user first
@@ -187,16 +255,14 @@ class ProfilePage extends StatelessWidget {
 
                 if (confirm != true) return;
 
-                // Ask for password
-                final password = await _askForPassword(context);
-                if (password == null || password.isEmpty) return;
-
                 // Delete account
                 try {
                   _showBlockingLoader(context, 'Deleting your account...');
 
+                  await reauthenticateForSensitiveAction(context);
                   await deleteUserData(uid: user.uid);
-                  await deleteAccountWithPassword(email: email, password: password);
+                  await user.delete();
+
 
                   // Sign out locally after deletion
                   await FirebaseAuth.instance.signOut();
