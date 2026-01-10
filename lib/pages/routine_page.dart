@@ -35,8 +35,8 @@ class _RoutinePageState extends State<RoutinePage> {
 
     _productsFuture = ProductsCache.instance.getProducts(limit: 200);
 
-    _morningSteps = buildMorningSteps();
-    _nightSteps = buildNightSteps();
+    _morningSteps = List<RoutineStep>.from(_store.morningSteps.value);
+    _nightSteps = List<RoutineStep>.from(_store.nightSteps.value);
 
     // Product page listener
     _store.morningSelections.addListener(_syncStepsFromStore);
@@ -89,6 +89,11 @@ class _RoutinePageState extends State<RoutinePage> {
       final item = _currentSteps.removeAt(oldIndex);
       _currentSteps.insert(newIndex, item);
     });
+    if (_routineType == RoutineType.morning) {
+      _store.setMorningSteps(_morningSteps);
+    } else {
+      _store.setNightSteps(_nightSteps);
+    }
   }
 
   Future<void> _openReplaceSheet(RoutineStep step) async {
@@ -181,6 +186,11 @@ class _RoutinePageState extends State<RoutinePage> {
         ),
       );
     });
+    if (_routineType == RoutineType.morning) {
+      _store.setMorningSteps(_morningSteps);
+    } else {
+      _store.setNightSteps(_nightSteps);
+    }
   }
 
   @override
@@ -268,6 +278,12 @@ class _RoutinePageState extends State<RoutinePage> {
                     setState(() {
                       _currentSteps.removeAt(index);
                     });
+
+                    if (_routineType == RoutineType.morning) {
+                      _store.setMorningSteps(_morningSteps);
+                    } else {
+                      _store.setNightSteps(_nightSteps);
+                    }
 
                     // If step deleted, also clear store value for that label
                     final label = step.title;

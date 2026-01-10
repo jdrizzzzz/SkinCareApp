@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import '../models/routine_step.dart';
+import '../utils/routine_defaults.dart';
 
 //Holds user routine choice's in memory
 class RoutineStore {
   RoutineStore._();
   static final RoutineStore instance = RoutineStore._();
+
+  final ValueNotifier<List<RoutineStep>> morningSteps =
+  ValueNotifier<List<RoutineStep>>(buildMorningSteps());
+
+  final ValueNotifier<List<RoutineStep>> nightSteps =
+  ValueNotifier<List<RoutineStep>>(buildNightSteps());
 
   // labelKey -> productId
   final ValueNotifier<Map<String, String>> morningSelections =
@@ -42,6 +50,52 @@ class RoutineStore {
     final next = Map<String, String>.from(nightSelections.value);
     next.remove(labelKey);
     nightSelections.value = next;
+  }
+
+  void setMorningSteps(List<RoutineStep> steps) {
+    morningSteps.value = List<RoutineStep>.from(steps);
+  }
+
+  void setNightSteps(List<RoutineStep> steps) {
+    nightSteps.value = List<RoutineStep>.from(steps);
+  }
+
+  void addMorningStep(RoutineStep step) {
+    final next = List<RoutineStep>.from(morningSteps.value)..add(step);
+    morningSteps.value = next;
+  }
+
+  void addNightStep(RoutineStep step) {
+    final next = List<RoutineStep>.from(nightSteps.value)..add(step);
+    nightSteps.value = next;
+  }
+
+  void removeMorningStep(String id) {
+    final next = List<RoutineStep>.from(morningSteps.value)
+      ..removeWhere((step) => step.id == id);
+    morningSteps.value = next;
+  }
+
+  void removeNightStep(String id) {
+    final next = List<RoutineStep>.from(nightSteps.value)
+      ..removeWhere((step) => step.id == id);
+    nightSteps.value = next;
+  }
+
+  void reorderMorningSteps(int oldIndex, int newIndex) {
+    final next = List<RoutineStep>.from(morningSteps.value);
+    if (newIndex > oldIndex) newIndex -= 1;
+    final item = next.removeAt(oldIndex);
+    next.insert(newIndex, item);
+    morningSteps.value = next;
+  }
+
+  void reorderNightSteps(int oldIndex, int newIndex) {
+    final next = List<RoutineStep>.from(nightSteps.value);
+    if (newIndex > oldIndex) newIndex -= 1;
+    final item = next.removeAt(oldIndex);
+    next.insert(newIndex, item);
+    nightSteps.value = next;
   }
 
   // Check if THIS label currently points to THIS product
