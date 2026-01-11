@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:skincare_project/utils/validation.dart';
+import 'package:skincare_project/services/quiz_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -89,6 +90,15 @@ class _LoginPageState extends State<LoginPage> {
     } finally {
       _googleAuthCompleter = null;
     }
+  }
+
+  Future<void> _navigateAfterGoogleSignIn() async {
+    final quizService = QuizService();
+    final quizAnswers = await quizService.loadQuizAnswers();
+    if (!mounted) return;
+
+    final destination = quizAnswers == null ? '/quiz' : '/weatherpage';
+    Navigator.pushReplacementNamed(context, destination);
   }
 
   //called automatically when google_sign_in emits sign in/sign out
@@ -385,7 +395,18 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 60),
+                  const SizedBox(height: 40),
+
+                  const Center(
+                    child: Text(
+                      "Sign in or Sign up with these providers ",
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
 
                   // Google and Apple icons row
                   Row(
@@ -395,12 +416,7 @@ class _LoginPageState extends State<LoginPage> {
                         onTap: () async {
                           try {
                             await signInWithGoogle(); //google
-                            if (context.mounted) {
-                              Navigator.pushReplacementNamed(
-                                context,
-                                '/weatherpage',
-                              );
-                            }
+                            await _navigateAfterGoogleSignIn();
                           } on FirebaseAuthException catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
