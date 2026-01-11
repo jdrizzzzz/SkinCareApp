@@ -11,6 +11,7 @@ class ProductService {
   Future<List<Product>> fetchProducts({int limit = 50}) async {
     final snapshot = await _db.collection('products').limit(limit).get();
 
+    //converts the products read into product objects
     return snapshot.docs
         .map((doc) => Product.fromFirestore(doc.id, doc.data()))
         .toList();

@@ -5,9 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import '../models/weather_model.dart';
 
-//-------------------This is the help / API tool -------------------
-// it only knows http request, the gps and json parsing
-
+//Talks to weather API
 class WeatherService {                //fetches the weather data
   static const BASE_URL = 'http://api.weatherapi.com/v1/current.json';
   final String apiKey;

@@ -3,6 +3,7 @@ import '../models/product.dart';
 import '../models/routine_step.dart';
 import '../models/user_profile.dart';
 
+//Generates routine steps based on user's preferences and recommended products (prebuilt or manual)
 class RoutineBuilder {
   List<RoutineStep> buildSteps({
     required RoutineType type,

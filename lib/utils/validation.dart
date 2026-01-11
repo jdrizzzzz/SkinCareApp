@@ -1,5 +1,4 @@
-//validation helpers - reusable rules for forms (login / signup)
-
+//Reusable rules for (login / signup)
 class Validator {
 
   //check if email is empty + valid format

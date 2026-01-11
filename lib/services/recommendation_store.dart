@@ -1,5 +1,6 @@
 import '../models/product.dart';
 
+//Cache that hold the recommended products
 class RecommendationStore {
   RecommendationStore._();
   static final RecommendationStore instance = RecommendationStore._();

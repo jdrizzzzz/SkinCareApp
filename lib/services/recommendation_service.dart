@@ -1,6 +1,7 @@
 import '../models/product.dart';
 import '../models/user_profile.dart';
 
+//Filters products based on user's quiz answers
 class RecommendationService {
   const RecommendationService();
 

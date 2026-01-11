@@ -1,3 +1,4 @@
+//Converts quiz answers to userprofile object
 class UserProfile {
   final String? skinType;
   final Set<String> conditions;

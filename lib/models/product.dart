@@ -1,3 +1,4 @@
+//Define a Product with fields
 class Product {
   final String id;
   final String name;
@@ -19,6 +20,7 @@ class Product {
     required this.ingredients,
   });
 
+  //converts firestore data to product object
   factory Product.fromFirestore(String id, Map<String, dynamic> data) {
     return Product(
       id: id,

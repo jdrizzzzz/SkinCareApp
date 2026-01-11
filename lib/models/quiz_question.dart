@@ -1,3 +1,4 @@
+//Defines QuizQuestion
 class QuizQuestion {
   final String sectionTitle;
   final String question;

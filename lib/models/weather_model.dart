@@ -1,7 +1,5 @@
-//-------------------This is a data box-------------------
 // it shows what the weather looks like in the app
 // its the Weather class - converts the JSON into Weather object
-
 class Weather {
   final String cityName;                   //variables
   final double temperature;

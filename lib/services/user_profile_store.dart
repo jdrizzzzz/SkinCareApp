@@ -1,5 +1,6 @@
 import '../models/user_profile.dart';
 
+//Cache's currents UserProfile for after quiz
 class UserProfileStore {
   UserProfileStore._();
   static final UserProfileStore instance = UserProfileStore._();
