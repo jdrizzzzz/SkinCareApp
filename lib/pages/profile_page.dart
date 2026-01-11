@@ -12,7 +12,15 @@ class ProfilePage extends StatelessWidget {
 
   // sign user out
   Future<void> signUserOut() async {
+    //firebase
     await FirebaseAuth.instance.signOut();
+
+    //google sign out
+      try {
+        await GoogleSignIn.instance.signOut(); //soft sign out
+        await GoogleSignIn.instance.disconnect(); //hard sign out (removes cached account)
+      } catch (_) {
+    }
   }
 
   //deleting account
@@ -38,9 +46,8 @@ class ProfilePage extends StatelessWidget {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) return;
 
-    final providerIds = currentUser.providerData
-        .map((provider) => provider.providerId)
-        .toList();
+    final providerIds =
+    currentUser.providerData.map((provider) => provider.providerId).toList();
 
     if (providerIds.contains('password')) {
       final email = currentUser.email;
@@ -168,7 +175,6 @@ class ProfilePage extends StatelessWidget {
     await user.updatePassword(newPassword);
   }
 
-
   void _showMessage(BuildContext context, String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(msg)),
@@ -176,23 +182,22 @@ class ProfilePage extends StatelessWidget {
   }
 
   void _showBlockingLoader(BuildContext context, String message) {
-    showDialog<void> (
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          content: Row(
-            children: [
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        content: Row(
+          children: [
             const SizedBox(
               height: 20,
               width: 20,
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
-          const SizedBox(width: 16),
-          Expanded(
-              child: Text(message)),
-            ],
-          ),
+            const SizedBox(width: 16),
+            Expanded(child: Text(message)),
+          ],
         ),
+      ),
     );
   }
 
@@ -200,13 +205,21 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,  // removes the arrow to navigate back
+        automaticallyImplyLeading: false, // removes the arrow to navigate back
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await signUserOut();
-              Navigator.pushReplacementNamed(context, '/loginpage');
+
+              //clear navigation stack so user cant go back into logged-in screens
+              if (context.mounted) {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/loginpage',
+                      (route) => false,
+                );
+              }
             },
           ),
         ],
@@ -263,14 +276,19 @@ class ProfilePage extends StatelessWidget {
                   await deleteUserData(uid: user.uid);
                   await user.delete();
 
-
-                  // Sign out locally after deletion
-                  await FirebaseAuth.instance.signOut();
+                  // Sign out locally after deletion (sign out everything)
+                  await signUserOut();
 
                   if (context.mounted) {
                     Navigator.pop(context);
                     _showMessage(context, 'Account deleted.');
-                    Navigator.pushReplacementNamed(context, '/loginpage');
+
+                    //clear navigation stack so user cant go back into logged-in screens
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/loginpage',
+                          (route) => false,
+                    );
                   }
                 } on FirebaseAuthException catch (e) {
                   if (context.mounted) {
@@ -279,7 +297,10 @@ class ProfilePage extends StatelessWidget {
                   if (e.code == 'wrong-password') {
                     _showMessage(context, 'Wrong password.');
                   } else if (e.code == 'requires-recent-login') {
-                    _showMessage(context, 'Please log in again, then try deleting.');
+                    _showMessage(
+                      context,
+                      'Please log in again, then try deleting.',
+                    );
                   } else {
                     _showMessage(context, 'Delete failed: ${e.message}');
                   }
@@ -365,7 +386,6 @@ class ProfilePage extends StatelessWidget {
                 }
               },
             ),
-
           ],
         ),
       ),
@@ -378,14 +398,16 @@ class ProfilePage extends StatelessWidget {
         selectedItemColor: Colors.amber[500],
         unselectedItemColor: Colors.grey,
         items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.home), label: 'Home'),
+            icon: Icon(Icons.calendar_month),
+            label: 'Routine',
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_month), label: 'Routine'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_basket), label: 'Products'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.person), label: 'Profile'),
+            icon: Icon(Icons.shopping_basket),
+            label: 'Products',
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
         currentIndex: 3,
         onTap: (index) {
