@@ -6,6 +6,7 @@ class Product {
   final double? price;
   final double? rank;
   final List<String> skinTypes;
+  final List<String> ingredients;
 
   Product({
     required this.id,
@@ -15,6 +16,7 @@ class Product {
     this.price,
     this.rank,
     required this.skinTypes,
+    required this.ingredients,
   });
 
   factory Product.fromFirestore(String id, Map<String, dynamic> data) {
@@ -26,6 +28,7 @@ class Product {
       price: (data['price'] as num?)?.toDouble(),
       rank: (data['rank'] as num?)?.toDouble(),
       skinTypes: List<String>.from(data['skinTypes'] ?? []),
+      ingredients: List<String>.from(data['ingredients'] ?? []),
     );
   }
 }

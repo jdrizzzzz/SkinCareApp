@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/routine_step.dart';
-import '../utils/routine_defaults.dart';
 
 //Holds user routine choice's in memory
 class RoutineStore {
@@ -8,10 +7,10 @@ class RoutineStore {
   static final RoutineStore instance = RoutineStore._();
 
   final ValueNotifier<List<RoutineStep>> morningSteps =
-  ValueNotifier<List<RoutineStep>>(buildMorningSteps());
+  ValueNotifier<List<RoutineStep>>([]);
 
   final ValueNotifier<List<RoutineStep>> nightSteps =
-  ValueNotifier<List<RoutineStep>>(buildNightSteps());
+  ValueNotifier<List<RoutineStep>>([]);
 
   // labelKey -> productId
   final ValueNotifier<Map<String, String>> morningSelections =
@@ -50,6 +49,14 @@ class RoutineStore {
     final next = Map<String, String>.from(nightSelections.value);
     next.remove(labelKey);
     nightSelections.value = next;
+  }
+
+  void clearMorningSelections() {
+    morningSelections.value = {};
+  }
+
+  void clearNightSelections() {
+    nightSelections.value = {};
   }
 
   void setMorningSteps(List<RoutineStep> steps) {

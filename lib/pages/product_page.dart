@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:skincare_project/pages/widgets/product_card.dart';
 import '../models/product.dart';
-import '../services/product_service.dart';
+import '../services/recommendation_store.dart';
 import '../services/products_cache.dart';
 
 class ProductPage extends StatefulWidget {
@@ -13,6 +13,8 @@ class ProductPage extends StatefulWidget {
 
 class _ProductPageState extends State<ProductPage> {
   late final Future<List<Product>> _productsFuture;
+  final RecommendationStore _recommendationStore =
+      RecommendationStore.instance;
 
   // Filter state
   String? _selectedBrand;                                 // null = All
@@ -72,10 +74,14 @@ class _ProductPageState extends State<ProductPage> {
                   }
 
                   final products = snapshot.data ?? [];
-                  if (products.isEmpty) return const SizedBox.shrink();
+                  final baseProducts = _recommendationStore.hasRecommendations
+                      ? _recommendationStore.recommended
+                      : products;
+
+                  if (baseProducts.isEmpty) return const SizedBox.shrink();
 
                   // Brand options
-                  final brands = products
+                  final brands = baseProducts
                       .map((p) => p.brand.trim())
                       .where((b) => b.isNotEmpty)
                       .toSet()
@@ -83,7 +89,7 @@ class _ProductPageState extends State<ProductPage> {
                     ..sort();
 
                   // Label options (cleanser/toner/etc.)
-                  final labels = products
+                  final labels = baseProducts
                       .map((p) => p.label.trim())
                       .where((l) => l.isNotEmpty)
                       .toSet()
@@ -252,11 +258,16 @@ class _ProductPageState extends State<ProductPage> {
                   }
 
                   final products = snapshot.data ?? [];
-                  if (products.isEmpty) {
+                  final baseProducts = _recommendationStore.hasRecommendations
+                      ? _recommendationStore.recommended
+                      : products;
+
+                  if (baseProducts.isEmpty) {
                     return const Center(child: Text('No products found.'));
                   }
 
-                  final filteredProducts = products.where(_matchesFilters).toList();
+                  final filteredProducts =
+                  baseProducts.where(_matchesFilters).toList();
 
                   if (filteredProducts.isEmpty) {
                     return const Center(child: Text('No products match your filters.'));

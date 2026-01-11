@@ -4,10 +4,10 @@ import 'package:skincare_project/pages/widgets/routine_steps_card.dart';
 import '../models/product.dart';
 import '../models/routine_step.dart';
 import '../utils/product_labels.dart';
-import '../utils/routine_defaults.dart';
 import '../services/products_cache.dart';
 import '../services/routine_store.dart';
 import 'widgets/replace_product_sheet.dart';
+import '../services/recommendation_store.dart';
 
 class RoutinePage extends StatefulWidget {
   const RoutinePage({super.key});
@@ -20,6 +20,8 @@ class _RoutinePageState extends State<RoutinePage> {
   RoutineType _routineType = RoutineType.morning;
 
   late final Future<List<Product>> _productsFuture;
+  final RecommendationStore _recommendationStore =
+      RecommendationStore.instance;
 
   late List<RoutineStep> _morningSteps;
   late List<RoutineStep> _nightSteps;
@@ -58,9 +60,12 @@ class _RoutinePageState extends State<RoutinePage> {
   Future<void> _syncStepsFromStore() async {
     final products = await _productsFuture;
     if (!mounted) return;
+    final availableProducts = _recommendationStore.hasRecommendations
+        ? _recommendationStore.recommended
+        : products;
 
     Product? findById(String id) {
-      for (final p in products) {
+      for (final p in availableProducts) {
         if (p.id == id) return p;
       }
       return null;
@@ -153,6 +158,9 @@ class _RoutinePageState extends State<RoutinePage> {
   Future<void> _openReplaceSheet(RoutineStep step) async {
     final products = await _productsFuture;
     if (!mounted) return;
+    final availableProducts = _recommendationStore.hasRecommendations
+        ? _recommendationStore.recommended
+        : products;
 
     final selected = await showModalBottomSheet<Product>(
       context: context,
@@ -164,7 +172,7 @@ class _RoutinePageState extends State<RoutinePage> {
       builder: (context) {
         return ReplaceProductSheet(
           title: step.title,
-          products: products,
+          products: availableProducts,
           currentlySelected: step.selectedProduct,
         );
       },
@@ -198,8 +206,11 @@ class _RoutinePageState extends State<RoutinePage> {
   Future<void> _addStep() async {
     final products = await _productsFuture;
     if (!mounted) return;
+    final availableProducts = _recommendationStore.hasRecommendations
+        ? _recommendationStore.recommended
+        : products;
 
-    final allLabels = extractProductLabels(products);
+    final allLabels = extractProductLabels(availableProducts);
 
     final usedLabels = _currentSteps
         .map((s) => s.title.trim().toLowerCase())

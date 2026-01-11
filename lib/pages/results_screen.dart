@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import '../constants/brand_colors.dart';
 import '../models/quiz_question.dart';
 import '../services/quiz_service.dart';
-
-// change this import path/name to your real WeatherPage file
+import '../services/products_cache.dart';
+import '../services/recommendation_service.dart';
+import '../services/recommendation_store.dart';
+import '../services/routine_store.dart';
+import '../services/user_profile_store.dart';
+import '../utils/routine_builder.dart';
+import '../models/user_profile.dart';
+import '../models/routine_step.dart';
 import '../pages/weather_page.dart';
 
 class ResultsScreen extends StatelessWidget {
@@ -168,13 +174,95 @@ class ResultsScreen extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: () async {
                     final quizService = QuizService();
+                    final profileStore = UserProfileStore.instance;
+                    final recommendationStore = RecommendationStore.instance;
+                    const recommendationService = RecommendationService();
+                    final routineStore = RoutineStore.instance;
+                    final routineBuilder = RoutineBuilder();
 
                     //answers to firestore
                     final Map<String, dynamic> answersToSave = answers.map(
-                        (key, value) => MapEntry(key.toString(), value),
+                          (key, value) => MapEntry(key.toString(), value),
                     );
 
                     await quizService.saveQuizAnswers(answersToSave);
+
+                    final profile = UserProfile.fromQuizResults(answers);
+                    profileStore.setProfile(profile);
+
+                    final products =
+                    await ProductsCache.instance.getProducts(limit: 200);
+                    final recommendedProducts =
+                    recommendationService.filterRecommendedProducts(
+                      products: products,
+                      profile: profile,
+                    );
+
+                    recommendationStore.setRecommendations(recommendedProducts);
+
+                    final wantsPrebuilt = await showDialog<bool>(
+                      context: context,
+                      builder: (dialogContext) {
+                        return AlertDialog(
+                          title: const Text('Choose your routine'),
+                          content: const Text(
+                            'Would you like a prebuilt routine with products '
+                                'selected for you, or build your own with recommended '
+                                'products?',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(dialogContext, false),
+                              child: const Text('Build my own'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(dialogContext, true),
+                              child: const Text('Prebuilt routine'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+
+                    final prebuilt = wantsPrebuilt ?? false;
+                    final morningSteps = routineBuilder.buildSteps(
+                      type: RoutineType.morning,
+                      profile: profile,
+                      recommendedProducts: recommendedProducts,
+                      autoSelectProducts: prebuilt,
+                    );
+                    final nightSteps = routineBuilder.buildSteps(
+                      type: RoutineType.night,
+                      profile: profile,
+                      recommendedProducts: recommendedProducts,
+                      autoSelectProducts: prebuilt,
+                    );
+
+                    routineStore.setMorningSteps(morningSteps);
+                    routineStore.setNightSteps(nightSteps);
+                    routineStore.clearMorningSelections();
+                    routineStore.clearNightSelections();
+
+                    if (prebuilt) {
+                      for (final step in morningSteps) {
+                        final product = step.selectedProduct;
+                        if (product != null) {
+                          routineStore.setMorning(
+                            label: step.title,
+                            productId: product.id,
+                          );
+                        }
+                      }
+                      for (final step in nightSteps) {
+                        final product = step.selectedProduct;
+                        if (product != null) {
+                          routineStore.setNight(
+                            label: step.title,
+                            productId: product.id,
+                          );
+                        }
+                      }
+                    }
 
                     Navigator.pushReplacement(
                       context,
