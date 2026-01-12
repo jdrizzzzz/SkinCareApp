@@ -12,15 +12,30 @@ class ProfilePage extends StatelessWidget {
 
   // sign user out
   Future<void> signUserOut() async {
-    //firebase
-    await FirebaseAuth.instance.signOut();
+    final providerIds = FirebaseAuth.instance.currentUser?.providerData
+        .map((provider) => provider.providerId)
+        .toList() ??
+        [];
 
     //google sign out
-      try {
-        await GoogleSignIn.instance.signOut(); //soft sign out
-        await GoogleSignIn.instance.disconnect(); //hard sign out (removes cached account)
-      } catch (_) {
+    try {
+      await GoogleSignIn.instance.signOut(); //soft sign out
+      await GoogleSignIn.instance.disconnect(); //hard sign out (removes cached account)
+    } catch (_) {
     }
+
+    //apple sign out
+    if (providerIds.contains('apple.com')) {
+      await signOutApple();
+      return;
+    }
+
+    //firebase sign out
+    await FirebaseAuth.instance.signOut();
+  }
+
+  Future<void> signOutApple() async {
+    await FirebaseAuth.instance.signOut();
   }
 
   //deleting account
@@ -37,6 +52,25 @@ class ProfilePage extends StatelessWidget {
     );
 
     await currentUser.reauthenticateWithCredential(credential);
+    await deleteUserData(uid: currentUser.uid);
+    await currentUser.delete();
+  }
+
+  Future<void> deleteAccountWithApple() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return;
+
+    final appleCredential = await SignInWithApple.getAppleIDCredential(
+      scopes: [AppleIDAuthorizationScopes.email],
+    );
+
+    final credential = OAuthProvider('apple.com').credential(
+      idToken: appleCredential.identityToken,
+      accessToken: appleCredential.authorizationCode,
+    );
+
+    await currentUser.reauthenticateWithCredential(credential);
+    await deleteUserData(uid: currentUser.uid);
     await currentUser.delete();
   }
 
@@ -74,6 +108,7 @@ class ProfilePage extends StatelessWidget {
       return;
     }
 
+    //google
     if (providerIds.contains('google.com')) {
       await GoogleSignIn.instance.initialize();
       final googleUser = await GoogleSignIn.instance.authenticate();
@@ -91,6 +126,7 @@ class ProfilePage extends StatelessWidget {
       return;
     }
 
+    //apple
     if (providerIds.contains('apple.com')) {
       final appleCredential = await SignInWithApple.getAppleIDCredential(
         scopes: [AppleIDAuthorizationScopes.email],
@@ -272,9 +308,38 @@ class ProfilePage extends StatelessWidget {
                 try {
                   _showBlockingLoader(context, 'Deleting your account...');
 
-                  await reauthenticateForSensitiveAction(context);
-                  await deleteUserData(uid: user.uid);
-                  await user.delete();
+                  final providerIds = user.providerData
+                      .map((provider) => provider.providerId)
+                      .toList();
+
+                  if (providerIds.contains('apple.com')) {
+                    await deleteAccountWithApple();
+                  } else if (providerIds.contains('password')) {
+                    final email = user.email;
+                    if (email == null) {
+                      throw FirebaseAuthException(
+                        code: 'missing-email',
+                        message: "This account doesn't have an email.",
+                      );
+                    }
+
+                    final password = await _askForPassword(context);
+                    if (password == null || password.isEmpty) {
+                      throw FirebaseAuthException(
+                        code: 'missing-password',
+                        message: 'Password is required to continue.',
+                      );
+                    }
+
+                    await deleteAccountWithPassword(
+                      email: email,
+                      password: password,
+                    );
+                  } else {
+                    await reauthenticateForSensitiveAction(context);
+                    await deleteUserData(uid: user.uid);
+                    await user.delete();
+                  }
 
                   // Sign out locally after deletion (sign out everything)
                   await signUserOut();
