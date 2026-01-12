@@ -239,9 +239,17 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
         automaticallyImplyLeading: false, // removes the arrow to navigate back
+        backgroundColor: Colors.grey[100],
+        elevation: 0,
+        title: const Text(
+          'Profile',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -262,23 +270,100 @@ class ProfilePage extends StatelessWidget {
       ),
 
       // body
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Logged in as ${user.email}',
-              style: const TextStyle(fontSize: 20),
-            ),
-            const SizedBox(height: 24),
-
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+          Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 18,
+                offset: const Offset(0, 10),
               ),
-              child: const Text('Delete account'),
-              onPressed: () async {
+            ],
+          ),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 32,
+                backgroundColor: Colors.amber[200],
+                child: const Icon(
+                  Icons.person,
+                  size: 32,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(width: 16),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Welcome back',
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      user.email ?? 'Signed in',
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        Text(
+          'Account actions',
+          style: textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      const SizedBox(height: 12),
+
+      Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+          SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red[600],
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            icon: const Icon(Icons.delete_forever),
+            label: const Text('Delete account'),
+            onPressed: () async {
 
                 // ---------------- to delete account----------------
                 // Verify current user first
@@ -376,82 +461,105 @@ class ProfilePage extends StatelessWidget {
                   _showMessage(context, 'Delete failed: $e');
                 }
               },
-            ),
+          ),
+        ),
 
             //------------------to change password-----------
             //Change password - need old password
-            ElevatedButton(
-              child: const Text('Change password'),
-              onPressed: () async {
-                final email = FirebaseAuth.instance.currentUser?.email;
-                if (email == null) return;
+          const SizedBox(height: 12),
+          SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.grey[900],
+                  side: BorderSide(color: Colors.grey[300]!),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                        ),
+                icon: const Icon(Icons.lock_reset),
+                label: const Text('Change password'),
+                onPressed: () async {
+                  final email = FirebaseAuth.instance.currentUser?.email;
+                  if (email == null) return;
 
-                final result = await showDialog<Map<String, String>>(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) {
-                    final oldPasswordController = TextEditingController();
-                    final newPasswordController = TextEditingController();
+                  final result = await showDialog<Map<String, String>>(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) {
+                      final oldPasswordController =
+                      TextEditingController();
+                      final newPasswordController =
+                      TextEditingController();
 
-                    return AlertDialog(
-                      title: const Text('Change password'),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          TextField(
-                            controller: oldPasswordController,
-                            obscureText: true,
-                            decoration: const InputDecoration(
-                              labelText: 'Current password',
+                      return AlertDialog(
+                        title: const Text('Change password'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextField(
+                              controller: oldPasswordController,
+                              obscureText: true,
+                              decoration: const InputDecoration(
+                                labelText: 'Current password',
+                              ),
                             ),
+                            const SizedBox(height: 12),
+                            TextField(
+                              controller: newPasswordController,
+                              obscureText: true,
+                              decoration: const InputDecoration(
+                                labelText: 'New password',
+                              ),
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.pop(context, null),
+                            child: const Text('Cancel'),
                           ),
-                          const SizedBox(height: 12),
-                          TextField(
-                            controller: newPasswordController,
-                            obscureText: true,
-                            decoration: const InputDecoration(
-                              labelText: 'New password',
-                            ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, {
+                              'old':
+                              oldPasswordController.text.trim(),
+                              'new':
+                              newPasswordController.text.trim(),
+                            }),
+                            child: const Text('Update'),
                           ),
                         ],
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, null),
-                          child: const Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, {
-                            'old': oldPasswordController.text.trim(),
-                            'new': newPasswordController.text.trim(),
-                          }),
-                          child: const Text('Update'),
-                        ),
-                      ],
+                      );
+                    },
+                  );
+
+                  if (result == null) return;
+
+                  try {
+                    await changePassword(
+                      email: email,
+                      oldPassword: result['old']!,
+                      newPassword: result['new']!,
                     );
-                  },
-                );
 
-                if (result == null) return;
-
-                try {
-                  await changePassword(
-                    email: email,
-                    oldPassword: result['old']!,
-                    newPassword: result['new']!,
-                  );
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Password updated')),
-                  );
-                } on FirebaseAuthException catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(e.message ?? 'Error')),
-                  );
-                }
-              },
-            ),
-          ],
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Password updated')),
+                    );
+                  } on FirebaseAuthException catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(e.message ?? 'Error')),
+                            );
+                          }
+                        },
+                      ),
+                  ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
 

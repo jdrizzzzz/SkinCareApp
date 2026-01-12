@@ -61,6 +61,79 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  Future<void> _showPasswordResetDialog() async {
+    final resetEmailController = TextEditingController(
+      text: _emailController.text.trim(),
+    );
+    final resetFormKey = GlobalKey<FormState>();
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Reset password'),
+          content: Form(
+            key: resetFormKey,
+            child: TextFormField(
+              controller: resetEmailController,
+              keyboardType: TextInputType.emailAddress,
+              autofocus: true,
+              validator: Validator.validateEmail,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                hintText: 'Enter your account email',
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                final isValid =
+                    resetFormKey.currentState?.validate() ?? false;
+                if (!isValid) return;
+                final resetEmail = resetEmailController.text.trim();
+
+                try {
+                  await FirebaseAuth.instance.sendPasswordResetEmail(
+                    email: resetEmail,
+                  );
+                  if (dialogContext.mounted) {
+                    Navigator.of(dialogContext).pop();
+                  }
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Password reset email sent to $resetEmail',
+                        ),
+                      ),
+                    );
+                  }
+                } on FirebaseAuthException catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content:
+                        Text(e.message ?? 'Failed to send reset email'),
+                      ),
+                    );
+                  }
+                }
+              },
+              child: const Text('Send'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   //google sign in
   Future<void> signInWithGoogle() async {
     //safety: android/ios should support authenticate(), but keep the official check
@@ -310,7 +383,7 @@ class _LoginPageState extends State<LoginPage> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () {},
+                      onPressed: _showPasswordResetDialog,
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
                         minimumSize: const Size(0, 0),
