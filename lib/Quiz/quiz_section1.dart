@@ -14,7 +14,6 @@ List<QuizQuestion> buildSection1Questions() {
         "Normal / balanced",
         "It changes often",
       ],
-      unsureOption: "I’m not sure",
     ),
     QuizQuestion(
       sectionTitle: 'SECTION 1 — Your Skin’s Natural State',
@@ -25,7 +24,6 @@ List<QuizQuestion> buildSection1Questions() {
         "Mildly sensitive — sometimes reactive",
         "Rarely reacts",
       ],
-      unsureOption: "I’m not sure",
     ),
     QuizQuestion(
       sectionTitle: 'SECTION 1 — Your Skin’s Natural State',
