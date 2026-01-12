@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -228,6 +229,14 @@ class _LoginPageState extends State<LoginPage> {
         AppleIDAuthorizationScopes.email,
         AppleIDAuthorizationScopes.fullName,
       ],
+      webAuthenticationOptions: Platform.isAndroid
+          ? WebAuthenticationOptions(
+        clientId: 'com.yourcompany.yourapp.service', // <-- your Apple "Services ID"
+        redirectUri: Uri.parse(
+          'https://your-domain.com/callbacks/sign_in_with_apple',
+        ),
+      )
+          : null,
     );
 
     final oauthCredential = OAuthProvider('apple.com').credential(
