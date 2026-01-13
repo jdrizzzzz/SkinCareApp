@@ -161,7 +161,7 @@ class _ProductCardState extends State<ProductCard> {
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: ClipRRect(
+                        child: ClipRRect(                         //product image
                           borderRadius: BorderRadius.circular(16),
                           child: widget.product.imageUrl == null ||
                               widget.product.imageUrl!.isEmpty
