@@ -80,8 +80,7 @@ class RoutineStepCard extends StatelessWidget {
                       Text(
                         productName,
                         style: subtitleStyle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        softWrap: true,
                       ),
                     ],
                   ),
