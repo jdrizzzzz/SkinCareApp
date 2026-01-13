@@ -230,12 +230,14 @@ class ResultsScreen extends StatelessWidget {
                       profile: profile,
                       recommendedProducts: recommendedProducts,
                       autoSelectProducts: prebuilt,
+                      includeOnlyRecommended: prebuilt,
                     );
                     final nightSteps = routineBuilder.buildSteps(
                       type: RoutineType.night,
                       profile: profile,
                       recommendedProducts: recommendedProducts,
                       autoSelectProducts: prebuilt,
+                      includeOnlyRecommended: prebuilt,
                     );
 
                     routineStore.setMorningSteps(morningSteps);

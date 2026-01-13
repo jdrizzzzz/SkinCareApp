@@ -10,6 +10,7 @@ class RoutineBuilder {
     required UserProfile profile,
     required List<Product> recommendedProducts,
     required bool autoSelectProducts,
+    bool includeOnlyRecommended = true,
   }) {
     final steps = <RoutineStep>[];
     final labelMatches = _labelMatches(recommendedProducts);
@@ -19,7 +20,10 @@ class RoutineBuilder {
         IconData icon,
         Color color,
         ) {
-      if (!labelMatches.contains(label.toLowerCase())) return;
+      if (includeOnlyRecommended &&
+          !labelMatches.contains(label.toLowerCase())) {
+        return;
+      }
       final selected = autoSelectProducts
           ? _pickFirstMatching(recommendedProducts, label)
           : null;
