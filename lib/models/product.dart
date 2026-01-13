@@ -8,6 +8,7 @@ class Product {
   final double? rank;
   final List<String> skinTypes;
   final List<String> ingredients;
+  final String? imageUrl;
 
   Product({
     required this.id,
@@ -18,6 +19,7 @@ class Product {
     this.rank,
     required this.skinTypes,
     required this.ingredients,
+    this.imageUrl,
   });
 
   //converts firestore data to product object
@@ -31,6 +33,7 @@ class Product {
       rank: (data['rank'] as num?)?.toDouble(),
       skinTypes: List<String>.from(data['skinTypes'] ?? []),
       ingredients: List<String>.from(data['ingredients'] ?? []),
+      imageUrl: data['imageUrl'] as String?,
     );
   }
 }

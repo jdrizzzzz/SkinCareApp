@@ -161,8 +161,32 @@ class _ProductCardState extends State<ProductCard> {
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: const Center(
-                          child: Icon(Icons.spa, color: Colors.black26, size: 40),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: widget.product.imageUrl == null ||
+                              widget.product.imageUrl!.isEmpty
+                              ? const Center(
+                            child: Icon(
+                              Icons.spa,
+                              color: Colors.black26,
+                              size: 40,
+                            ),
+                          )
+                              : Image.network(
+                            widget.product.imageUrl!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Center(
+                                child: Icon(
+                                  Icons.broken_image_outlined,
+                                  color: Colors.black26,
+                                  size: 40,
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                       Positioned(
