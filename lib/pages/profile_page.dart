@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+import '../services/notification_service.dart';
+
 class ProfilePage extends StatelessWidget {
   ProfilePage({super.key});
 
@@ -12,17 +14,18 @@ class ProfilePage extends StatelessWidget {
 
   // sign user out
   Future<void> signUserOut() async {
-    final providerIds = FirebaseAuth.instance.currentUser?.providerData
-        .map((provider) => provider.providerId)
-        .toList() ??
+    final providerIds =
+        FirebaseAuth.instance.currentUser?.providerData
+            .map((provider) => provider.providerId)
+            .toList() ??
         [];
 
     //google sign out
     try {
       await GoogleSignIn.instance.signOut(); //soft sign out
-      await GoogleSignIn.instance.disconnect(); //hard sign out (removes cached account)
-    } catch (_) {
-    }
+      await GoogleSignIn.instance
+          .disconnect(); //hard sign out (removes cached account)
+    } catch (_) {}
 
     //apple sign out
     if (providerIds.contains('apple.com')) {
@@ -74,14 +77,13 @@ class ProfilePage extends StatelessWidget {
     await currentUser.delete();
   }
 
-  Future<void> reauthenticateForSensitiveAction(
-      BuildContext context,
-      ) async {
+  Future<void> reauthenticateForSensitiveAction(BuildContext context) async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) return;
 
-    final providerIds =
-    currentUser.providerData.map((provider) => provider.providerId).toList();
+    final providerIds = currentUser.providerData
+        .map((provider) => provider.providerId)
+        .toList();
 
     if (providerIds.contains('password')) {
       final email = currentUser.email;
@@ -166,16 +168,12 @@ class ProfilePage extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Please enter your password to delete your account.',
-            ),
+            const Text('Please enter your password to delete your account.'),
             const SizedBox(height: 12),
             TextField(
               controller: controller,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-              ),
+              decoration: const InputDecoration(labelText: 'Password'),
             ),
           ],
         ),
@@ -212,9 +210,7 @@ class ProfilePage extends StatelessWidget {
   }
 
   void _showMessage(BuildContext context, String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   void _showBlockingLoader(BuildContext context, String message) {
@@ -261,7 +257,7 @@ class ProfilePage extends StatelessWidget {
                 Navigator.pushNamedAndRemoveUntil(
                   context,
                   '/loginpage',
-                      (route) => false,
+                  (route) => false,
                 );
               }
             },
@@ -274,287 +270,335 @@ class ProfilePage extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-          Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.06),
-                blurRadius: 18,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: 32,
-                backgroundColor: Colors.amber[200],
-                child: const Icon(
-                  Icons.person,
-                  size: 32,
-                  color: Colors.black87,
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 18,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 16),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    Text(
-                      'Welcome back',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
+                    CircleAvatar(
+                      radius: 32,
+                      backgroundColor: Colors.amber[200],
+                      child: const Icon(
+                        Icons.person,
+                        size: 32,
+                        color: Colors.black87,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      user.email ?? 'Signed in',
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
+                    const SizedBox(width: 16),
+
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Welcome back',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            user.email ?? 'Signed in',
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-        Text(
-          'Account actions',
-          style: textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      const SizedBox(height: 12),
-
-      Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 16,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-          SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red[600],
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+              //routine reminder
+              Text(
+                'Routine reminder',
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-            icon: const Icon(Icons.delete_forever),
-            label: const Text('Delete account'),
-            onPressed: () async {
+              const SizedBox(height: 12),
 
-                // ---------------- to delete account----------------
-                // Verify current user first
-                final confirm = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Delete account?'),
-                    content: const Text(
-                      'This action is permanent. Are you sure you want to delete your account?',
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
                     ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: const Text('Cancel'),
+                  ],
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        child: const Text('Continue'),
-                      ),
-                    ],
-                  ),
-                );
-
-                if (confirm != true) return;
-
-                // Delete account
-                try {
-                  _showBlockingLoader(context, 'Deleting your account...');
-
-                  final providerIds = user.providerData
-                      .map((provider) => provider.providerId)
-                      .toList();
-
-                  if (providerIds.contains('apple.com')) {
-                    await deleteAccountWithApple();
-                  } else if (providerIds.contains('password')) {
-                    final email = user.email;
-                    if (email == null) {
-                      throw FirebaseAuthException(
-                        code: 'missing-email',
-                        message: "This account doesn't have an email.",
-                      );
-                    }
-
-                    final password = await _askForPassword(context);
-                    if (password == null || password.isEmpty) {
-                      throw FirebaseAuthException(
-                        code: 'missing-password',
-                        message: 'Password is required to continue.',
-                      );
-                    }
-
-                    await deleteAccountWithPassword(
-                      email: email,
-                      password: password,
-                    );
-                  } else {
-                    await reauthenticateForSensitiveAction(context);
-                    await deleteUserData(uid: user.uid);
-                    await user.delete();
-                  }
-
-                  // Sign out locally after deletion (sign out everything)
-                  await signUserOut();
-
-                  if (context.mounted) {
-                    Navigator.pop(context);
-                    _showMessage(context, 'Account deleted.');
-
-                    //clear navigation stack so user cant go back into logged-in screens
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      '/loginpage',
-                          (route) => false,
-                    );
-                  }
-                } on FirebaseAuthException catch (e) {
-                  if (context.mounted) {
-                    Navigator.pop(context);
-                  }
-                  if (e.code == 'wrong-password') {
-                    _showMessage(context, 'Wrong password.');
-                  } else if (e.code == 'requires-recent-login') {
-                    _showMessage(
-                      context,
-                      'Please log in again, then try deleting.',
-                    );
-                  } else {
-                    _showMessage(context, 'Delete failed: ${e.message}');
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    Navigator.pop(context);
-                  }
-                  _showMessage(context, 'Delete failed: $e');
-                }
-              },
-          ),
-        ),
-
-            //------------------to change password-----------
-            //Change password - need old password
-          const SizedBox(height: 12),
-          SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.grey[900],
-                  side: BorderSide(color: Colors.grey[300]!),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                        ),
-                icon: const Icon(Icons.lock_reset),
-                label: const Text('Change password'),
-                onPressed: () async {
-                  final email = FirebaseAuth.instance.currentUser?.email;
-                  if (email == null) return;
-
-                  final result = await showDialog<Map<String, String>>(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                      final oldPasswordController =
-                      TextEditingController();
-                      final newPasswordController =
-                      TextEditingController();
-
-                      return AlertDialog(
-                        title: const Text('Change password'),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextField(
-                              controller: oldPasswordController,
-                              obscureText: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Current password',
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            TextField(
-                              controller: newPasswordController,
-                              obscureText: true,
-                              decoration: const InputDecoration(
-                                labelText: 'New password',
-                              ),
-                            ),
-                          ],
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () =>
-                                Navigator.pop(context, null),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, {
-                              'old':
-                              oldPasswordController.text.trim(),
-                              'new':
-                              newPasswordController.text.trim(),
-                            }),
-                            child: const Text('Update'),
-                          ),
-                        ],
+                    ),
+                    onPressed: () async {
+                      await NotificationService.instance.showNotification(
+                        title: "This is a routine reminder! ",
                       );
                     },
-                  );
+                    child: const Text("Send Notification"),
+                  ),
+                ),
+              ),
 
-                  if (result == null) return;
+              //account actions
+              Text(
+                'Account actions',
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 12),
 
-                  try {
-                    await changePassword(
-                      email: email,
-                      oldPassword: result['old']!,
-                      newPassword: result['new']!,
-                    );
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red[600],
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        icon: const Icon(Icons.delete_forever),
+                        label: const Text('Delete account'),
+                        onPressed: () async {
+                          // ---------------- to delete account----------------
+                          // Verify current user first
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Delete account?'),
+                              content: const Text(
+                                'This action is permanent. Are you sure you want to delete your account?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('Continue'),
+                                ),
+                              ],
+                            ),
+                          );
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Password updated')),
-                    );
-                  } on FirebaseAuthException catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(e.message ?? 'Error')),
+                          if (confirm != true) return;
+
+                          // Delete account
+                          try {
+                            _showBlockingLoader(
+                              context,
+                              'Deleting your account...',
+                            );
+
+                            final providerIds = user.providerData
+                                .map((provider) => provider.providerId)
+                                .toList();
+
+                            if (providerIds.contains('apple.com')) {
+                              await deleteAccountWithApple();
+                            } else if (providerIds.contains('password')) {
+                              final email = user.email;
+                              if (email == null) {
+                                throw FirebaseAuthException(
+                                  code: 'missing-email',
+                                  message:
+                                      "This account doesn't have an email.",
+                                );
+                              }
+
+                              final password = await _askForPassword(context);
+                              if (password == null || password.isEmpty) {
+                                throw FirebaseAuthException(
+                                  code: 'missing-password',
+                                  message: 'Password is required to continue.',
+                                );
+                              }
+
+                              await deleteAccountWithPassword(
+                                email: email,
+                                password: password,
+                              );
+                            } else {
+                              await reauthenticateForSensitiveAction(context);
+                              await deleteUserData(uid: user.uid);
+                              await user.delete();
+                            }
+
+                            // Sign out locally after deletion (sign out everything)
+                            await signUserOut();
+
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                              _showMessage(context, 'Account deleted.');
+
+                              //clear navigation stack so user cant go back into logged-in screens
+                              Navigator.pushNamedAndRemoveUntil(
+                                context,
+                                '/loginpage',
+                                (route) => false,
+                              );
+                            }
+                          } on FirebaseAuthException catch (e) {
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                            }
+                            if (e.code == 'wrong-password') {
+                              _showMessage(context, 'Wrong password.');
+                            } else if (e.code == 'requires-recent-login') {
+                              _showMessage(
+                                context,
+                                'Please log in again, then try deleting.',
+                              );
+                            } else {
+                              _showMessage(
+                                context,
+                                'Delete failed: ${e.message}',
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                            }
+                            _showMessage(context, 'Delete failed: $e');
+                          }
+                        },
+                      ),
+                    ),
+
+                    //------------------to change password-----------
+                    //Change password - need old password
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.grey[900],
+                          side: BorderSide(color: Colors.grey[300]!),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        icon: const Icon(Icons.lock_reset),
+                        label: const Text('Change password'),
+                        onPressed: () async {
+                          final email =
+                              FirebaseAuth.instance.currentUser?.email;
+                          if (email == null) return;
+
+                          final result = await showDialog<Map<String, String>>(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) {
+                              final oldPasswordController =
+                                  TextEditingController();
+                              final newPasswordController =
+                                  TextEditingController();
+
+                              return AlertDialog(
+                                title: const Text('Change password'),
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    TextField(
+                                      controller: oldPasswordController,
+                                      obscureText: true,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Current password',
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    TextField(
+                                      controller: newPasswordController,
+                                      obscureText: true,
+                                      decoration: const InputDecoration(
+                                        labelText: 'New password',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, null),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, {
+                                      'old': oldPasswordController.text.trim(),
+                                      'new': newPasswordController.text.trim(),
+                                    }),
+                                    child: const Text('Update'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+
+                          if (result == null) return;
+
+                          try {
+                            await changePassword(
+                              email: email,
+                              oldPassword: result['old']!,
+                              newPassword: result['new']!,
+                            );
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Password updated')),
+                            );
+                          } on FirebaseAuthException catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.message ?? 'Error')),
                             );
                           }
                         },
                       ),
-                  ),
+                    ),
                   ],
                 ),
               ),

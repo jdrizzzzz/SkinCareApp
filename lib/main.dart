@@ -7,6 +7,7 @@ import 'package:skincare_project/pages/profile_page.dart';
 import 'package:skincare_project/pages/quiz_start_screen.dart';
 import 'package:skincare_project/pages/routine_page.dart';
 import 'package:skincare_project/pages/weather_page.dart';
+import 'package:skincare_project/services/notification_service.dart';
 import 'pages/login_page.dart';
 import 'package:skincare_project/services/routine_store.dart';
 
@@ -16,6 +17,7 @@ Future<void> main() async {   //waits for env and firebase to load until UI is s
   await dotenv.load(fileName: ".env");              // load .env first
   await Firebase.initializeApp();                   //initialize firebase once globally
   await RoutineStore.instance.loadFromPrefs();
+  await NotificationService.instance.initNotification(); //initialize notifications
   runApp(const MyApp());
 }
 

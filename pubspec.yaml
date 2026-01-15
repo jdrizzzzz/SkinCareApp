@@ -46,7 +46,7 @@ dependencies:
   firebase_auth: ^6.1.2
   flutter_dotenv: ^5.2.1
   cloud_firestore: ^6.1.1
-  flutter_local_notifications: ^19.4.1
+  flutter_local_notifications: ^19.5.0
   flutter_timezone: ^4.1.1
   shared_preferences: ^2.5.3
   timezone: ^0.10.0
