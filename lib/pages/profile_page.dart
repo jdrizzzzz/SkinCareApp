@@ -345,22 +345,51 @@ class ProfilePage extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      // test notification
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        onPressed: () async {
+                          await NotificationService.instance.showNotification(
+                            title: "This is a test routine reminder! ",
+                          );
+                        },
+                        child: const Text("Send Notification"),
                       ),
                     ),
-                    onPressed: () async {
-                      await NotificationService.instance.showNotification(
-                        title: "This is a routine reminder! ",
-                      );
-                    },
-                    child: const Text("Send Notification"),
-                  ),
+                    const SizedBox(height: 12),
+
+                    //scheduled notification
+                    SizedBox(
+                      width: double.infinity,
+                      // test notification
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        onPressed: () async {
+                          await NotificationService.instance.scheduleNotification(
+                            title: "SERUM Reminder ",
+                            body: 'Time to do your skincare!',
+                            hour: 10,
+                            minute: 25,
+                          );
+                        },
+                        child: const Text("Send Scheduled Notification"),
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
