@@ -478,7 +478,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: [
                         Expanded(
                           child: Text(
-                            'Default reminder at 8AM                 Disable to choose your own schedule',
+                            'Default reminder at 8AM                             Disable to choose your own schedule',
                             style: textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
