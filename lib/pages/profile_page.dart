@@ -1,16 +1,159 @@
+import 'dart:core';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-
 import '../services/notification_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ProfilePage extends StatelessWidget {
-  ProfilePage({super.key});
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
 
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
   final user = FirebaseAuth.instance.currentUser!;
   final _db = FirebaseFirestore.instance;
+
+  bool useDefaultReminder = true;
+  String scheduleType = 'daily'; // daily/weekly/twice
+  TimeOfDay time1 = const TimeOfDay(hour: 8, minute: 0);
+  TimeOfDay time2 = const TimeOfDay(hour: 20, minute: 0);
+  int weeklyDay = DateTime.monday;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReminderSettings();
+  }
+
+  Future<void> _loadReminderSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      useDefaultReminder = prefs.getBool('useDefaultReminder') ?? true;
+      scheduleType = prefs.getString('scheduleType') ?? 'daily';
+      weeklyDay = prefs.getInt('weeklyDay') ?? DateTime.monday;
+
+      final h1 = prefs.getInt('time1_hour') ?? 8;
+      final m1 = prefs.getInt('time1_minute') ?? 0;
+      time1 = TimeOfDay(hour: h1, minute: m1);
+
+      final h2 = prefs.getInt('time2_hour') ?? 20;
+      final m2 = prefs.getInt('time2_minute') ?? 0;
+      time2 = TimeOfDay(hour: h2, minute: m2);
+    });
+  }
+
+  Future<void> _saveReminderSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('useDefaultReminder', useDefaultReminder);
+    await prefs.setString('scheduleType', scheduleType);
+    await prefs.setInt('weeklyDay', weeklyDay);
+    await prefs.setInt('time1_hour', time1.hour);
+    await prefs.setInt('time1_minute', time1.minute);
+    await prefs.setInt('time2_hour', time2.hour);
+    await prefs.setInt('time2_minute', time2.minute);
+  }
+
+  Future<void> _pickTime1() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: time1,
+    );
+    if (picked != null) {
+      setState(() => time1 = picked);
+    }
+  }
+
+  Future<void> _pickTime2() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: time2,
+    );
+    if (picked != null) {
+      setState(() => time2 = picked);
+    }
+  }
+
+  String _weekdayLabel(int day) {
+    switch (day) {
+      case DateTime.monday:
+        return 'Monday';
+      case DateTime.tuesday:
+        return 'Tuesday';
+      case DateTime.wednesday:
+        return 'Wednesday';
+      case DateTime.thursday:
+        return 'Thursday';
+      case DateTime.friday:
+        return 'Friday';
+      case DateTime.saturday:
+        return 'Saturday';
+      case DateTime.sunday:
+        return 'Sunday';
+      default:
+        return 'Monday';
+    }
+  }
+
+  Future<void> _applyReminderSchedule() async {
+    await NotificationService.instance.initNotification();
+
+    //cancel previous reminder ids
+    await NotificationService.instance.cancelNotification(1);
+    await NotificationService.instance.cancelNotification(2);
+    await NotificationService.instance.cancelNotification(10);
+    await NotificationService.instance.cancelNotification(11);
+
+    if (useDefaultReminder) {
+      await NotificationService.instance.scheduleNotification(
+        id: 1,
+        title: "SERUM Reminder ",
+        body: 'Time to do your skincare!',
+        hour: 8,
+        minute: 0,
+      );
+    } else {
+      if (scheduleType == 'daily') {
+        await NotificationService.instance.scheduleNotification(
+          id: 1,
+          title: "SERUM Reminder ",
+          body: 'Time to do your skincare!',
+          hour: time1.hour,
+          minute: time1.minute,
+        );
+      } else if (scheduleType == 'weekly') {
+        await NotificationService.instance.scheduleWeeklyNotification(
+          id: 2,
+          title: "SERUM Reminder ",
+          body: 'Time to do your skincare!',
+          weekday: weeklyDay,
+          hour: time1.hour,
+          minute: time1.minute,
+        );
+      } else if (scheduleType == 'twice') {
+        await NotificationService.instance.scheduleTwiceDaily(
+          title: "SERUM Reminder ",
+          body: 'Time to do your skincare!',
+          hour1: time1.hour,
+          minute1: time1.minute,
+          hour2: time2.hour,
+          minute2: time2.minute,
+          id1: 10,
+          id2: 11,
+        );
+      }
+    }
+
+    await _saveReminderSettings();
+
+    if (mounted) {
+      _showMessage(context, 'Reminder schedule saved!');
+    }
+  }
 
   // sign user out
   Future<void> signUserOut() async {
@@ -18,7 +161,7 @@ class ProfilePage extends StatelessWidget {
         FirebaseAuth.instance.currentUser?.providerData
             .map((provider) => provider.providerId)
             .toList() ??
-        [];
+            [];
 
     //google sign out
     try {
@@ -246,23 +389,7 @@ class ProfilePage extends StatelessWidget {
           'Profile',
           style: TextStyle(fontWeight: FontWeight.w700),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await signUserOut();
-
-              //clear navigation stack so user cant go back into logged-in screens
-              if (context.mounted) {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/loginpage',
-                  (route) => false,
-                );
-              }
-            },
-          ),
-        ],
+        actions: const [],
       ),
 
       // body
@@ -297,7 +424,6 @@ class ProfilePage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 16),
-
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -347,48 +473,110 @@ class ProfilePage extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    SizedBox(
-                      width: double.infinity,
-                      // test notification
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                    //default or toggle
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Default reminder at 8AM                 Disable to choose your own schedule',
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
-                        onPressed: () async {
-                          await NotificationService.instance.showNotification(
-                            title: "This is a test routine reminder! ",
-                          );
-                        },
-                        child: const Text("Send Notification"),
-                      ),
+                        Switch(
+                          value: useDefaultReminder,
+                          onChanged: (v) =>
+                              setState(() => useDefaultReminder = v),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 12),
 
-                    //scheduled notification
-                    SizedBox(
-                      width: double.infinity,
-                      // test notification
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                    //Schedule
+                    if (!useDefaultReminder) ...[
+                      DropdownButtonFormField<String>(
+                        value: scheduleType,
+                        decoration: const InputDecoration(
+                          labelText: 'Schedule',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                              value: 'daily', child: Text('Daily (once a day)')),
+                          DropdownMenuItem(value: 'weekly', child: Text('Weekly')),
+                          DropdownMenuItem(value: 'twice', child: Text('Twice a day')),
+                        ],
+                        onChanged: (v) {
+                          if (v == null) return;
+                          setState(() => scheduleType = v);
+                        },
+                      ),
+                      const SizedBox(height: 12),
+
+                      if (scheduleType == 'weekly') ...[
+                        DropdownButtonFormField<int>(
+                          value: weeklyDay,
+                          decoration: const InputDecoration(
+                            labelText: 'Day of week',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: [
+                            for (final day in [
+                              DateTime.monday,
+                              DateTime.tuesday,
+                              DateTime.wednesday,
+                              DateTime.thursday,
+                              DateTime.friday,
+                              DateTime.saturday,
+                              DateTime.sunday,
+                            ])
+                              DropdownMenuItem(
+                                value: day,
+                                child: Text(_weekdayLabel(day)),
+                              ),
+                          ],
+                          onChanged: (v) {
+                            if (v == null) return;
+                            setState(() => weeklyDay = v);
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: _pickTime1,
+                          child: Text('Pick time: ${time1.format(context)}'),
+                        ),
+                      ),
+                      if (scheduleType == 'twice') ...[
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: _pickTime2,
+                            child: Text('Pick second time: ${time2.format(context)}'),
                           ),
                         ),
-                        onPressed: () async {
-                          await NotificationService.instance.scheduleNotification(
-                            title: "SERUM Reminder ",
-                            body: 'Time to do your skincare!',
-                            hour: 10,
-                            minute: 25,
-                          );
-                        },
-                        child: const Text("Send Scheduled Notification"),
+                      ],
+                      const SizedBox(height: 12),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          onPressed: _applyReminderSchedule,
+                          child: const Text("Save Reminder Schedule"),
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 12),
+                    ],
                   ],
                 ),
               ),
@@ -417,6 +605,7 @@ class ProfilePage extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
+
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
@@ -442,8 +631,7 @@ class ProfilePage extends StatelessWidget {
                               ),
                               actions: [
                                 TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(context, false),
+                                  onPressed: () => Navigator.pop(context, false),
                                   child: const Text('Cancel'),
                                 ),
                                 TextButton(
@@ -453,16 +641,13 @@ class ProfilePage extends StatelessWidget {
                               ],
                             ),
                           );
-
                           if (confirm != true) return;
-
                           // Delete account
                           try {
                             _showBlockingLoader(
                               context,
                               'Deleting your account...',
                             );
-
                             final providerIds = user.providerData
                                 .map((provider) => provider.providerId)
                                 .toList();
@@ -474,8 +659,7 @@ class ProfilePage extends StatelessWidget {
                               if (email == null) {
                                 throw FirebaseAuthException(
                                   code: 'missing-email',
-                                  message:
-                                      "This account doesn't have an email.",
+                                  message: "This account doesn't have an email.",
                                 );
                               }
 
@@ -508,7 +692,7 @@ class ProfilePage extends StatelessWidget {
                               Navigator.pushNamedAndRemoveUntil(
                                 context,
                                 '/loginpage',
-                                (route) => false,
+                                    (route) => false,
                               );
                             }
                           } on FirebaseAuthException catch (e) {
@@ -555,18 +739,15 @@ class ProfilePage extends StatelessWidget {
                         icon: const Icon(Icons.lock_reset),
                         label: const Text('Change password'),
                         onPressed: () async {
-                          final email =
-                              FirebaseAuth.instance.currentUser?.email;
+                          final email = FirebaseAuth.instance.currentUser?.email;
                           if (email == null) return;
 
                           final result = await showDialog<Map<String, String>>(
                             context: context,
                             barrierDismissible: false,
                             builder: (context) {
-                              final oldPasswordController =
-                                  TextEditingController();
-                              final newPasswordController =
-                                  TextEditingController();
+                              final oldPasswordController = TextEditingController();
+                              final newPasswordController = TextEditingController();
 
                               return AlertDialog(
                                 title: const Text('Change password'),
@@ -592,8 +773,7 @@ class ProfilePage extends StatelessWidget {
                                 ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, null),
+                                    onPressed: () => Navigator.pop(context, null),
                                     child: const Text('Cancel'),
                                   ),
                                   TextButton(
@@ -628,6 +808,36 @@ class ProfilePage extends StatelessWidget {
                         },
                       ),
                     ),
+                    const SizedBox(height: 12),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.grey[900],
+                          side: BorderSide(color: Colors.grey[300]!),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        icon: const Icon(Icons.logout),
+                        label: const Text('Logout'),
+                        onPressed: () async {
+                          await signUserOut();
+
+                          //clear navigation stack so user cant go back into logged-in screens
+                          if (context.mounted) {
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              '/loginpage',
+                                  (route) => false,
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                   ],
                 ),
               ),

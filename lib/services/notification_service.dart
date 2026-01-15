@@ -22,7 +22,8 @@ class NotificationService {
     tz.setLocalLocation(tz.getLocation(currentTimeZone));
 
     // prepare android init settings
-    const initSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initSettingsAndroid =
+    AndroidInitializationSettings('@mipmap/ic_launcher');
 
     //prepare ios init settings
     const initSettingsIOS = DarwinInitializationSettings(
@@ -41,8 +42,8 @@ class NotificationService {
     await notificationsPlugin.initialize(initSettings);
 
     //android permission request
-    final androidPlugin = notificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    final androidPlugin = notificationsPlugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
 
     await androidPlugin?.requestNotificationsPermission();
 
@@ -85,7 +86,6 @@ class NotificationService {
   }
 
   //Schedule a notification at a specified time - hour and minute
-
   Future<void> scheduleNotification({
     int id = 1,
     required String title,
@@ -93,10 +93,8 @@ class NotificationService {
     required int hour,
     required int minute,
   }) async {
-    //get current date/time of local timezone
     final now = tz.TZDateTime.now(tz.local);
 
-    //create date/time for today hour/min
     var scheduledDate = tz.TZDateTime(
       tz.local,
       now.year,
@@ -109,15 +107,9 @@ class NotificationService {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
-    //Schedule the notification
-
-    //Android specific
-    //androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-    //androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-
     // If exact alarms aren't permitted, fall back to inexact scheduling
-    final androidPlugin = notificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    final androidPlugin = notificationsPlugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
 
     bool canUseExact = true;
     if (androidPlugin != null) {
@@ -136,16 +128,9 @@ class NotificationService {
       body,
       scheduledDate,
       notificationDetails(),
-
-      //IOS specific
-      //uiLocalNotificationDateInterpretation:
-      //  UILocalNotificationDateInterpretation.absoluteTime,
-
       androidScheduleMode: canUseExact
           ? AndroidScheduleMode.exactAllowWhileIdle
           : AndroidScheduleMode.inexactAllowWhileIdle,
-
-      //set daily notification
       matchDateTimeComponents: DateTimeComponents.time,
     );
 
@@ -153,6 +138,91 @@ class NotificationService {
     if (!canUseExact) {
       print("exact alarms not permitted -> scheduled using inexact mode");
     }
+  }
+
+  //Schedule weekly (weekday: DateTime.monday ... DateTime.sunday)
+  Future<void> scheduleWeeklyNotification({
+    int id = 2,
+    required String title,
+    required String body,
+    required int weekday,
+    required int hour,
+    required int minute,
+  }) async {
+    final now = tz.TZDateTime.now(tz.local);
+
+    tz.TZDateTime scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
+
+    // move to the next instance of that weekday
+    while (scheduledDate.weekday != weekday || scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    final androidPlugin = notificationsPlugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+
+    bool canUseExact = true;
+    if (androidPlugin != null) {
+      final allowed = await androidPlugin.canScheduleExactNotifications();
+      if (allowed != true) {
+        await androidPlugin.requestExactAlarmsPermission();
+        canUseExact = (await androidPlugin.canScheduleExactNotifications()) == true;
+      } else {
+        canUseExact = true;
+      }
+    }
+
+    await notificationsPlugin.zonedSchedule(
+      id,
+      title,
+      body,
+      scheduledDate,
+      notificationDetails(),
+      androidScheduleMode: canUseExact
+          ? AndroidScheduleMode.exactAllowWhileIdle
+          : AndroidScheduleMode.inexactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+    );
+  }
+
+  //Twice daily (schedules 2 different IDs)
+  Future<void> scheduleTwiceDaily({
+    required String title,
+    required String body,
+    required int hour1,
+    required int minute1,
+    required int hour2,
+    required int minute2,
+    int id1 = 10,
+    int id2 = 11,
+  }) async {
+    await scheduleNotification(
+      id: id1,
+      title: title,
+      body: body,
+      hour: hour1,
+      minute: minute1,
+    );
+
+    await scheduleNotification(
+      id: id2,
+      title: title,
+      body: body,
+      hour: hour2,
+      minute: minute2,
+    );
+  }
+
+  //Cancel specific notification id
+  Future<void> cancelNotification(int id) async {
+    await notificationsPlugin.cancel(id);
   }
 
   //Cancel all notifications
