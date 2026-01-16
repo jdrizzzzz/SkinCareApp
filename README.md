@@ -1,52 +1,61 @@
-# Application Development 2 - Project
+# SkinCare App
 
-This template repository is the starter project for App. Dev. 2 project. Written in Flutter/Dart.
+A Flutter mobile app that helps users build a personalized skincare routine. The app blends a short quiz, curated product recommendations, daily routine planning, and local weather insights to support better skincare decisions.
 
-## Deliverables
+## Features
+- **Authentication & profiles** with email and social sign-in options.
+- **Skin quiz** to collect preferences and tailor recommendations.
+- **Product recommendations** with filtering by brand, label/type, and price range.
+- **Routine builder** for morning and night routines with customizable steps.
+- **Weather dashboard** using geolocation to show local conditions, temperature, and humidity.
+- **Notifications** to keep routines on schedule.
 
-### Deliverable 0
+## Tech stack
+- **Flutter / Dart**
+- **Firebase** (core/auth)
+- **WeatherAPI** for weather data
+- **Geolocator/Geocoding** for location lookup
+- **Local notifications** for reminders
 
-The holistic learning of the course will be evaluated through the term project in which a team of 2-3 students should design and implement a mobile application from scratch. The app selected should cover a challenging task.
+## Getting started
 
-At the end of the term, each team needs to submit a project report, present their ideas and also demonstrate the app to the teacher/class. A team of three students (max) would be considered a team. There will be three deliverables
+### Prerequisites
 
-Team members present their app idea (PowerPoint) and design the prototype of the application.
+- [Flutter SDK](https://docs.flutter.dev/get-started/install)
+- A configured iOS/Android device or emulator
+- (Optional) Firebase project for authentication
+- WeatherAPI key
 
-The PowerPoint presents the title of the project, team members, description of the project, number of screen flows, chosen database, presenting GitHub link, and mock-up that depicts the entire navigation of the app.
+### Configuration
 
-For this deliverable, you have the following tasks:
+```bash
+WEATHER_API_KEY=your_key_here
+```
 
-• Project Description (innovation) – 2%  
-• Mock-up design – 3%
+If you are using Firebase authentication, follow the FlutterFire setup steps for your platform and add the generated configuration files to the project.
 
-You could use tools like [Moqups](https://moqups.com/) or [Figma](https://www.figma.com/) for making the mock-up design and wiring.
+### Install dependencies
 
-### Deliverable 1
+```bash
+flutter pub get
+```
+```bash
+flutter run
+```
 
-For this deliverable, you have the following tasks based on your course outline **(15%)**:
+## Project structure
 
-• UI Interface (material design, activity flow) – 3%  
-• Database connection (backend connection) – 3%  
-• CRUD operations – 3%  
-• Landing page (Home screen) – 3%  
-• ListView implementation (displaying the data) – 3%
+```
+lib/
+  main.dart                # App entrypoint and routes
+  pages/                   # Screens (login, quiz, routine, products, weather, profile)
+  services/                # API clients, caching, notifications
+  models/                  # Data models
+  utils/                    # Helpers and constants
+```
 
-Also, include a document explaining task distribution between team members.
+## Notes
 
-### Deliverable 2
+- The weather screen uses device location permissions to determine the current city.
+- The product and routine experiences are designed to work together: the quiz seeds recommendations and the routine builder lets users select products by step.
 
-For this deliverable, you have the following tasks based on your course outline **(15%)**:
-
-• Completed UI interface (Entire Navigation flow of minimum 10 activities/fragments/ListView) – 4%  
-• API calls (JSON, Async, Threading) – 3%  
-• Notification manager – 2%  
-• Authentication (Email, SMS, call) – 2%  
-• Location awareness (Google maps, places, address) – 2%  
-• Running on an emulator – 2%
-
-Final report: **(5%)**  
-• Project Aim and description  
-• Functional and non-functional requirements  
-• User stories  
-• Test cases  
-• Individual’s role and responsibilities
