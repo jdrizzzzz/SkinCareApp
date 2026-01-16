@@ -51,7 +51,7 @@ lib/
   pages/                   # Screens (login, quiz, routine, products, weather, profile)
   services/                # API clients, caching, notifications
   models/                  # Data models
-  utils/                    # Helpers and constants
+  utils/                   # Helpers and constants
 ```
 
 ## Notes
